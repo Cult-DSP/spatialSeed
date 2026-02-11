@@ -1,0 +1,3 @@
+[submodule "LUSID"]
+	path = LUSID
+	url = https://github.com/Cult-DSP/LUSID
