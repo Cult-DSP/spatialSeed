@@ -1,3 +1,6 @@
 [submodule "LUSID"]
 	path = LUSID
 	url = https://github.com/Cult-DSP/LUSID
+[submodule "essentia"]
+	path = essentia
+	url = https://github.com/MTG/essentia
