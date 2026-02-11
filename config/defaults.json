@@ -1,0 +1,42 @@
+{
+  "version": "0.1.0",
+  "sample_rate": 48000,
+  "audio_format": "float32",
+  "coordinate_system": {
+    "type": "normalized_cartesian",
+    "axes": {
+      "x": "right",
+      "y": "front",
+      "z": "up"
+    },
+    "bounds": [-1.0, 1.0]
+  },
+  "seed_matrix": {
+    "default_u": 0.5,
+    "default_v": 0.3,
+    "z_dim": 8
+  },
+  "mir": {
+    "cache_enabled": true,
+    "instrument_model": "mtg_jamendo_instrument-discogs-effnet",
+    "role_model": "fs_loop_ds-msd-musicnn",
+    "category_threshold": 0.35,
+    "category_margin": 0.05,
+    "role_threshold": 0.6
+  },
+  "gesture": {
+    "position_epsilon": 0.01,
+    "spread_epsilon": 0.02,
+    "default_orbit_radius": 0.3,
+    "default_orbit_period": 8.0
+  },
+  "export": {
+    "contains_audio_threshold_db": -100.0,
+    "create_sidecar_xml": true
+  },
+  "paths": {
+    "spf_config": null,
+    "direct_speaker_template": "templates/directSpeakerData.json",
+    "lusid_submodule": "../LUSID"
+  }
+}

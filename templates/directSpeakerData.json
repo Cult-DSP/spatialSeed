@@ -1,0 +1,83 @@
+{
+  "direct_speakers": [
+    {
+      "id": "1.1",
+      "type": "direct_speaker",
+      "speakerLabel": "RC_L",
+      "channelName": "RoomCentricLeft",
+      "channelID": "AC_00011001",
+      "cart": [-1.0, 1.0, 0.0]
+    },
+    {
+      "id": "2.1",
+      "type": "direct_speaker",
+      "speakerLabel": "RC_R",
+      "channelName": "RoomCentricRight",
+      "channelID": "AC_00011002",
+      "cart": [1.0, 1.0, 0.0]
+    },
+    {
+      "id": "3.1",
+      "type": "direct_speaker",
+      "speakerLabel": "RC_C",
+      "channelName": "RoomCentricCenter",
+      "channelID": "AC_00011003",
+      "cart": [0.0, 1.0, 0.0]
+    },
+    {
+      "id": "5.1",
+      "type": "direct_speaker",
+      "speakerLabel": "RC_Lss",
+      "channelName": "RoomCentricLeftSideSurround",
+      "channelID": "AC_00011005",
+      "cart": [-1.0, 0.0, 0.0]
+    },
+    {
+      "id": "6.1",
+      "type": "direct_speaker",
+      "speakerLabel": "RC_Rss",
+      "channelName": "RoomCentricRightSideSurround",
+      "channelID": "AC_00011006",
+      "cart": [1.0, 0.0, 0.0]
+    },
+    {
+      "id": "7.1",
+      "type": "direct_speaker",
+      "speakerLabel": "RC_Lrs",
+      "channelName": "RoomCentricLeftRearSurround",
+      "channelID": "AC_00011007",
+      "cart": [-1.0, -1.0, 0.0]
+    },
+    {
+      "id": "8.1",
+      "type": "direct_speaker",
+      "speakerLabel": "RC_Rrs",
+      "channelName": "RoomCentricRightRearSurround",
+      "channelID": "AC_00011008",
+      "cart": [1.0, -1.0, 0.0]
+    },
+    {
+      "id": "9.1",
+      "type": "direct_speaker",
+      "speakerLabel": "RC_Lts",
+      "channelName": "RoomCentricLeftTopSurround",
+      "channelID": "AC_00011009",
+      "cart": [-1.0, 0.0, 1.0]
+    },
+    {
+      "id": "10.1",
+      "type": "direct_speaker",
+      "speakerLabel": "RC_Rts",
+      "channelName": "RoomCentricRightTopSurround",
+      "channelID": "AC_0001100a",
+      "cart": [1.0, 0.0, 1.0]
+    }
+  ],
+  "lfe": {
+    "id": "4.1",
+    "type": "LFE",
+    "speakerLabel": "RC_LFE",
+    "channelName": "RoomCentricLFE",
+    "channelID": "AC_00011004"
+  }
+}
