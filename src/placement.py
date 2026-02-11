@@ -6,254 +6,154 @@ Stage 6: Static Placement
 Responsibilities:
 - Produce base cart [x,y,z] for each object
 - Respect constraints (no-height, symmetry, etc.)
-- Clamp to normalized cube [-1,1]³
+- Clamp to normalized cube [-1,1]^3
 - Log clamp events
 
-Per spec: lowLevelSpecsV1.md § 7, agents.md § 2.2, § 8
+Per spec: lowLevelSpecsV1.md 7, agents.md 2.2, 8
 """
 
 import numpy as np
 from typing import Dict, List, Tuple
 import logging
 
+from src.spf import StyleProfile, clamp_to_cube
+
+logger = logging.getLogger("spatialSeed.placement")
+
 
 class PlacementEngine:
     """
     Generates static spatial placements from StyleProfiles.
-    
-    Per spec (agents.md § 2.2):
-    - Normalized Cartesian cube: x,y,z ∈ [-1,1]
+
+    Per spec (agents.md 2.2):
+    - Normalized Cartesian cube: x,y,z in [-1,1]
     - Axes: +X = right, +Y = front, +Z = up
     - Clamp positions to cube; log clamp events
     """
-    
+
     def __init__(self):
-        """Initialize placement engine."""
-        self.clamp_log = []
-    
-    def clamp_to_cube(self, x: float, y: float, z: float) -> Tuple[float, float, float]:
+        self.clamp_log: List[Dict] = []
+
+    # ------------------------------------------------------------------
+    # Constraint helpers
+    # ------------------------------------------------------------------
+
+    @staticmethod
+    def apply_front_back_bias(y: float, front_back_bias: float) -> float:
         """
-        Clamp position to normalized cube [-1,1]³.
-        
-        Args:
-            x, y, z: Input coordinates
-            
-        Returns:
-            Clamped (x, y, z)
-            
-        Per spec (agents.md § 2.2, § 11):
-        - Clamp positions to the cube
-        - Log clamp events for diagnostics
+        Modulate Y by front-back bias.
+
+        front_back_bias near 0 -> push objects forward (positive Y).
+        front_back_bias near 1 -> allow objects behind listener (negative Y).
         """
-        x_clamped = np.clip(x, -1.0, 1.0)
-        y_clamped = np.clip(y, -1.0, 1.0)
-        z_clamped = np.clip(z, -1.0, 1.0)
-        
-        # Log if clamping occurred
-        if x != x_clamped or y != y_clamped or z != z_clamped:
-            self.clamp_log.append({
-                "original": (x, y, z),
-                "clamped": (x_clamped, y_clamped, z_clamped),
-            })
-        
-        return (x_clamped, y_clamped, z_clamped)
-    
-    def apply_symmetry_constraint(self, positions: List[Tuple], 
-                                  symmetry_bias: float) -> List[Tuple]:
-        """
-        Apply symmetry constraints to positions.
-        
-        Args:
-            positions: List of (x, y, z) tuples
-            symmetry_bias: Symmetry bias from style vector [0,1]
-                          0 = fully asymmetric, 1 = enforce symmetry
-        
-        Returns:
-            Adjusted positions
-            
-        Per spec (seed_matrix.py):
-        - z[4]: symmetry bias (symmetric → asymmetric)
-        """
-        # TODO: Implement symmetry logic
-        # - If symmetry_bias is high:
-        #   - Mirror positions across x=0 plane
-        #   - Pair objects symmetrically
-        # - If low: allow asymmetric placement
-        
-        return positions
-    
-    def apply_front_back_bias(self, y: float, front_back_bias: float) -> float:
-        """
-        Apply front-back bias to Y coordinate.
-        
-        Args:
-            y: Original Y coordinate
-            front_back_bias: Front-back bias from style vector [0,1]
-                           0 = front-heavy, 1 = surround
-        
-        Returns:
-            Adjusted Y coordinate
-        """
-        # TODO: Implement front-back bias
-        # - If front_back_bias is low: push objects forward (y > 0)
-        # - If high: distribute around listener (y can be negative)
-        
-        # Placeholder: linear push/pull
-        adjusted_y = y * (0.5 + 0.5 * front_back_bias)
-        
-        return adjusted_y
-    
-    def apply_height_constraint(self, z: float, height_usage: float,
-                               no_height: bool = False) -> float:
-        """
-        Apply height constraints.
-        
-        Args:
-            z: Original Z coordinate
-            height_usage: Height usage from style vector [0,1]
-            no_height: If True, force z=0 (floor level)
-        
-        Returns:
-            Adjusted Z coordinate
-        """
+        # Scale: bias=0 compresses Y to [0.3, 1.0]; bias=1 keeps original
+        min_y = 0.3 * (1.0 - front_back_bias)
+        return y * (1.0 - min_y) + min_y if y >= 0 else y * front_back_bias
+
+    @staticmethod
+    def apply_height_constraint(z: float, height_usage: float,
+                                no_height: bool = False) -> float:
+        """Scale Z by height_usage.  If no_height is True, force z=0."""
         if no_height:
             return 0.0
-        
-        # Scale height by usage factor
-        adjusted_z = z * height_usage
-        
-        return adjusted_z
-    
-    def compute_placement(self, profile, style_vector: np.ndarray,
-                         mix_features: Dict = None) -> Tuple[float, float, float]:
+        return z * height_usage
+
+    # ------------------------------------------------------------------
+    # Single placement
+    # ------------------------------------------------------------------
+
+    def compute_placement(
+        self,
+        profile: StyleProfile,
+        style_vector: np.ndarray,
+        no_height: bool = False,
+    ) -> Tuple[float, float, float]:
         """
         Compute static placement for a single object.
-        
-        Args:
-            profile: StyleProfile instance
-            style_vector: Style vector z
-            mix_features: Optional stereo mix features for context
-            
-        Returns:
-            Tuple of (x, y, z) in normalized cube
-            
+
         Pipeline:
-        1. Start with profile's base XYZ
-        2. Apply style vector modulations
-        3. Apply constraints (symmetry, front-back, height)
-        4. Clamp to cube
+        1. Start with profile's resolved base XYZ.
+        2. Apply front-back bias and height scaling from style vector.
+        3. Clamp to cube.
         """
-        # Extract style vector components
-        placement_spread = style_vector[0]
-        height_usage = style_vector[1]
-        symmetry_bias = style_vector[4]
-        front_back_bias = style_vector[5]
-        ensemble_cohesion = style_vector[6]
-        
-        # Start with profile base
+        height_usage    = float(style_vector[1])
+        front_back_bias = float(style_vector[5])
+
         x = profile.base_x
-        y = profile.base_y
-        z = profile.base_z
-        
-        # TODO: Apply style modulations
-        # - Add controlled randomness based on placement_spread
-        # - Adjust based on ensemble_cohesion (grouped vs dispersed)
-        # - Consider mix features (stereo width, L/R balance)
-        
-        # Apply constraints
-        y = self.apply_front_back_bias(y, front_back_bias)
-        z = self.apply_height_constraint(z, height_usage)
-        
-        # Clamp to cube
-        x, y, z = self.clamp_to_cube(x, y, z)
-        
-        return (x, y, z)
-    
-    def compute_all_placements(self, profiles: Dict, style_vector: np.ndarray,
-                              mir_summary: Dict = None) -> Dict[str, Tuple]:
+        y = self.apply_front_back_bias(profile.base_y, front_back_bias)
+        z = self.apply_height_constraint(profile.base_z, height_usage, no_height)
+
+        # Clamp
+        xc, yc, zc = clamp_to_cube(x, y, z)
+        if (xc, yc, zc) != (x, y, z):
+            self.clamp_log.append({
+                "node_id": profile.node_id,
+                "original": (round(x, 4), round(y, 4), round(z, 4)),
+                "clamped": (round(xc, 4), round(yc, 4), round(zc, 4)),
+            })
+
+        return (round(xc, 4), round(yc, 4), round(zc, 4))
+
+    # ------------------------------------------------------------------
+    # Batch placement
+    # ------------------------------------------------------------------
+
+    def compute_all_placements(
+        self,
+        profiles: Dict[str, StyleProfile],
+        style_vector: np.ndarray,
+        no_height: bool = False,
+    ) -> Dict[str, Tuple[float, float, float]]:
         """
         Compute static placements for all objects.
-        
-        Args:
-            profiles: Dict of StyleProfiles keyed by node_id
-            style_vector: Style vector z
-            mir_summary: Optional MIR summary with mix features
-            
+
         Returns:
-            Dict of {node_id: (x, y, z)} placements
+            Dict of {node_id: (x, y, z)}
         """
         print("Stage 6: Static Placement")
-        
-        # Get mix features if available
-        mix_features = mir_summary.get("mix", {}) if mir_summary else {}
-        
-        placements = {}
-        
-        for node_id, profile in profiles.items():
-            x, y, z = self.compute_placement(profile, style_vector, mix_features)
-            placements[node_id] = (x, y, z)
-            print(f"  {node_id}: ({x:.3f}, {y:.3f}, {z:.3f})")
-        
-        # Log clamp events
+
+        placements: Dict[str, Tuple[float, float, float]] = {}
+
+        for node_id in sorted(profiles.keys()):
+            profile = profiles[node_id]
+            pos = self.compute_placement(profile, style_vector, no_height)
+            placements[node_id] = pos
+            print(f"  {node_id}: ({pos[0]:.3f}, {pos[1]:.3f}, {pos[2]:.3f})")
+
+        # Report clamp events
         if self.clamp_log:
-            logging.warning(f"Clamped {len(self.clamp_log)} positions to cube")
-            for event in self.clamp_log:
-                logging.debug(f"  {event['original']} → {event['clamped']}")
-        
+            logger.warning("Clamped %d positions to cube", len(self.clamp_log))
+            for evt in self.clamp_log:
+                logger.debug("  %s  %s -> %s", evt["node_id"],
+                             evt["original"], evt["clamped"])
+
         return placements
 
 
-def normalize_vector(x: float, y: float, z: float) -> Tuple[float, float, float]:
-    """
-    Normalize a direction vector to unit length.
-    
-    Args:
-        x, y, z: Vector components
-        
-    Returns:
-        Normalized (x, y, z)
-        
-    Per spec (lowLevelSpecsV1.md):
-    - Vectors are normalized to unit length by the renderer
-    - But we can pre-normalize for clarity
-    """
-    magnitude = np.sqrt(x**2 + y**2 + z**2)
-    
-    if magnitude == 0:
-        return (0.0, 1.0, 0.0)  # Default to front
-    
-    return (x / magnitude, y / magnitude, z / magnitude)
+# ------------------------------------------------------------------
+# Utility: stereo-pair symmetric positions
+# ------------------------------------------------------------------
 
+def compute_stereo_pair_positions(
+    left_profile: StyleProfile,
+    right_profile: StyleProfile,
+    style_vector: np.ndarray,
+    spread: float = 0.3,
+) -> Tuple[Tuple[float, float, float], Tuple[float, float, float]]:
+    """
+    Compute symmetric positions for a stereo pair.
 
-def compute_stereo_pair_positions(left_profile, right_profile,
-                                  style_vector: np.ndarray,
-                                  spread: float = 0.3) -> Tuple[Tuple, Tuple]:
+    The SPF resolver already applies L/R azimuth offsets, so this is
+    mainly a convenience for post-hoc adjustment if needed.
     """
-    Compute symmetric positions for stereo pair.
-    
-    Args:
-        left_profile: StyleProfile for left channel
-        right_profile: StyleProfile for right channel
-        style_vector: Style vector z
-        spread: Stereo spread (angular separation)
-        
-    Returns:
-        Tuple of ((x_left, y_left, z_left), (x_right, y_right, z_right))
-        
-    Per spec (agents.md § 2.3):
-    - Stereo stems become two objects
-    - Can apply stereo-aware placement logic
-    """
-    # TODO: Compute symmetric positions
-    # - Use base position from one profile
-    # - Mirror across x=0 with spread
-    # - Maintain same y and z
-    
-    base_x = left_profile.base_x
-    base_y = left_profile.base_y
-    base_z = left_profile.base_z
-    
-    x_left = base_x - spread
-    x_right = base_x + spread
-    
-    return ((x_left, base_y, base_z), (x_right, base_y, base_z))
+    lx, ly, lz = left_profile.base_x, left_profile.base_y, left_profile.base_z
+    rx, ry, rz = right_profile.base_x, right_profile.base_y, right_profile.base_z
+
+    # Enforce symmetry on shared Y and Z
+    avg_y = (ly + ry) / 2.0
+    avg_z = (lz + rz) / 2.0
+
+    return (
+        clamp_to_cube(lx, avg_y, avg_z),
+        clamp_to_cube(rx, avg_y, avg_z),
+    )

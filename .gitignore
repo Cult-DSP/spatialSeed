@@ -21,6 +21,7 @@ wheels/
 *.egg
 
 # Virtual environments
+.venv/
 venv/
 ENV/
 env/
@@ -42,6 +43,10 @@ export/
 *.wav
 *.mp3
 *.flac
+test_session/stems/
+test_session/work/
+test_session/export/
+test_session/manifest.json
 
 # Logs
 *.log

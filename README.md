@@ -22,16 +22,20 @@ SpatialSeed is a **LUSID-first** spatial audio authoring pipeline that:
 git clone --recursive https://github.com/Cult-DSP/spatialSeed.git
 cd spatialSeed
 
-# Initialize submodules (essentia, LUSID)
+# Run init.sh -- creates .venv, installs deps, inits submodules
+chmod +x init.sh activate.sh
 ./init.sh
 
-# Install Python dependencies
-pip install -r requirements.txt
+# Activate the virtual environment (sets PYTHONPATH too)
+source activate.sh
 ```
 
 ### Basic Usage
 
 ```bash
+# Make sure the venv is active
+source activate.sh
+
 # Run pipeline from command line
 python src/pipeline.py /path/to/stems --project-dir ./my_project -u 0.5 -v 0.3
 
@@ -120,7 +124,8 @@ spatialSeed/
 │   └── classify_README.md
 ├── LUSID/                    # LUSID submodule
 ├── essentia/                 # Essentia submodule (for models)
-└── init.sh                   # Initialization script
+├── init.sh                   # One-time setup (venv + deps + submodules)
+└── activate.sh               # Activate venv for each session
 ```
 
 ## Configuration
@@ -136,16 +141,23 @@ See `config/defaults.json` for default settings. Key parameters:
 
 ## Development Status
 
-**Version 0.1.0** - Initial implementation with pseudocode scaffolding
+**Version 0.1.0** - Prototype implementation in progress
 
 Current status:
 
-- ✅ Complete module structure
-- ✅ Comprehensive pseudocode and comments
-- ⚠️ Implementation TODOs throughout
-- ⚠️ Requires Essentia integration
-- ⚠️ Requires LUSID transcoder integration
-- ⚠️ Requires audio I/O library integration
+- [DONE] Complete module structure
+- [DONE] Virtual environment setup (init.sh / activate.sh)
+- [DONE] Session discovery and manifest generation (session.py)
+- [DONE] Audio normalisation -- resample, stereo split, bed WAVs (audio_io.py)
+- [DONE] MIR feature extraction via librosa (mir/extract.py)
+- [DONE] Classification with filename + MIR heuristic fallbacks (mir/classify.py)
+- [DONE] Seed Matrix analytic mapping (seed_matrix.py)
+- [DONE] End-to-end test with real stems -- stages 0-3 validated
+- [TODO] Spatial processing (spf.py, placement.py, gesture_engine.py)
+- [TODO] LUSID scene assembly (lusid_writer.py)
+- [TODO] Export packaging (export/lusid_package.py, export/adm_bw64.py)
+- [TODO] Essentia TF model integration (optional, falls back to heuristics)
+- [TODO] Streamlit UI
 
 ## Documentation
 
@@ -158,15 +170,15 @@ Current status:
 
 Core:
 
-- Python 3.8+
-- NumPy
-- Essentia (for MIR + classification)
+- Python 3.10+
+- NumPy, SciPy
+- librosa (audio resampling + MIR feature extraction)
+- soundfile (audio I/O)
 - LUSID (submodule, for ADM transcoding)
 
-Audio I/O:
+Optional:
 
-- librosa or soundfile (for WAV handling)
-- scipy (for resampling)
+- essentia-tensorflow (ML classification -- falls back to filename + MIR heuristics)
 
 UI (optional):
 

@@ -11,17 +11,17 @@ from pathlib import Path
 from typing import Optional, Tuple
 
 # Import all pipeline modules
-from session import SessionManager
-from audio_io import AudioNormalizer
-from mir.extract import MIRExtractor
-from mir.classify import InstrumentClassifier
-from seed_matrix import SeedMatrix
-from spf import SPFResolver
-from placement import PlacementEngine
-from gesture_engine import GestureEngine
-from lusid_writer import LUSIDSceneWriter
-from export.lusid_package import LUSIDPackageExporter
-from export.adm_bw64 import ADMBw64Exporter
+from src.session import SessionManager
+from src.audio_io import AudioNormalizer
+from src.mir.extract import MIRExtractor
+from src.mir.classify import InstrumentClassifier
+from src.seed_matrix import SeedMatrix
+from src.spf import SPFResolver
+from src.placement import PlacementEngine
+from src.gesture_engine import GestureEngine
+from src.lusid_writer import LUSIDSceneWriter
+from src.export.lusid_package import LUSIDPackageExporter
+from src.export.adm_bw64 import ADMBw64Exporter
 
 
 class SpatialSeedPipeline:
@@ -54,7 +54,8 @@ class SpatialSeedPipeline:
             dir_path.mkdir(parents=True, exist_ok=True)
     
     def run(self, u: float = 0.5, v: float = 0.3,
-           export_adm: bool = False) -> dict:
+           export_adm: bool = False,
+           classification_overrides: Optional[dict] = None) -> dict:
         """
         Run complete pipeline.
         
@@ -62,6 +63,8 @@ class SpatialSeedPipeline:
             u: Seed Matrix u parameter (aesthetic variation)
             v: Seed Matrix v parameter (dynamic immersion)
             export_adm: If True, also export ADM/BW64
+            classification_overrides: Optional dict of node_id -> {category, role_hint}
+                overrides from the UI. Keys not present or set to "auto" are ignored.
             
         Returns:
             Pipeline results dict
@@ -102,6 +105,20 @@ class SpatialSeedPipeline:
         classifier = InstrumentClassifier(cache_dir=str(self.cache_dir / "classify"))
         classifications = classifier.classify_all_stems(manifest, mir_summary, str(wav_dir))
         
+        # Apply UI overrides (if any)
+        if classification_overrides:
+            for node_id, ov in classification_overrides.items():
+                if node_id in classifications:
+                    if "category" in ov:
+                        classifications[node_id]["category"] = ov["category"]
+                        classifications[node_id]["fallbacks_used"].append("ui_override")
+                        print(f"  Override {node_id} category -> {ov['category']}")
+                    if "role_hint" in ov:
+                        classifications[node_id]["role_hint"] = ov["role_hint"]
+                        if "ui_override" not in classifications[node_id]["fallbacks_used"]:
+                            classifications[node_id]["fallbacks_used"].append("ui_override")
+                        print(f"  Override {node_id} role -> {ov['role_hint']}")
+        
         # Stage 4: Seed Matrix Selection
         seed_matrix = SeedMatrix()
         style_vector = seed_matrix.map_uv_to_z(u, v)
@@ -112,10 +129,12 @@ class SpatialSeedPipeline:
         selection_path = self.work_dir / "seed_selection.json"
         seed_matrix.save_selection(u, v, style_vector, str(selection_path))
         
-        # Stage 5: SPF Resolution → StyleProfile
+        # Stage 5: SPF Resolution -> StyleProfile
         spf_config_path = self.config.get("spf_config_path")
         spf_resolver = SPFResolver(spf_config_path=spf_config_path)
-        profiles = spf_resolver.resolve_all_profiles(classifications, mir_summary, style_vector)
+        profiles = spf_resolver.resolve_all_profiles(
+            manifest, classifications, mir_summary, style_vector
+        )
         
         # Save profiles
         profiles_path = self.work_dir / "style_profiles.json"
@@ -123,10 +142,10 @@ class SpatialSeedPipeline:
         
         # Stage 6: Static Placement
         placement_engine = PlacementEngine()
-        placements = placement_engine.compute_all_placements(profiles, style_vector, mir_summary)
+        placements = placement_engine.compute_all_placements(profiles, style_vector)
         
         # Stage 7: Gesture Generation
-        duration = 300.0  # TODO: Compute from longest stem
+        duration = manifest.get("max_duration_seconds", 300.0)
         gesture_engine = GestureEngine(duration_seconds=duration)
         keyframes = gesture_engine.generate_all_gestures(placements, profiles, mir_summary)
         
@@ -137,11 +156,15 @@ class SpatialSeedPipeline:
         # Stage 8: LUSID Scene Assembly
         lusid_writer = LUSIDSceneWriter(sample_rate=48000)
         scene_path = self.work_dir / "scene.lusid.json"
-        lusid_writer.write_scene(keyframes, str(scene_path))
+        scene = lusid_writer.write_scene(keyframes, str(scene_path))
         
         # Validate scene
-        if lusid_writer.validate_scene():
-            print("  LUSID scene validated ✓")
+        scene_errors = lusid_writer.validate_scene(scene)
+        if scene_errors:
+            for err in scene_errors:
+                print(f"  WARN: {err}")
+        else:
+            print("  LUSID scene validated OK")
         
         # Stage 9: Exports
         print("=" * 60)
@@ -159,25 +182,32 @@ class SpatialSeedPipeline:
         )
         
         # Validate package
-        if lusid_exporter.validate_package():
-            print("  LUSID package validated ✓")
+        pkg_errors = lusid_exporter.validate_package()
+        if pkg_errors:
+            for err in pkg_errors:
+                print(f"  WARN: {err}")
+        else:
+            print("  LUSID package validated OK")
         
         # Export B: ADM/BW64 (optional)
         if export_adm:
-            lusid_submodule_path = self.project_dir.parent / "LUSID"
-            adm_exporter = ADMBw64Exporter(str(lusid_submodule_path))
+            adm_exporter = ADMBw64Exporter()
             
             adm_output_path = self.export_dir / "export.adm.wav"
-            adm_exporter.export_adm_bw64(
+            adm_result = adm_exporter.export_adm_bw64(
                 lusid_package_dir=str(lusid_package_dir),
                 manifest=manifest,
                 output_path=str(adm_output_path),
                 sidecar_xml=True,
             )
             
-            # Validate BW64
-            if adm_exporter.validate_bw64(str(adm_output_path)):
-                print("  ADM/BW64 validated ✓")
+            # Validate
+            adm_errors = adm_exporter.validate_bw64(str(adm_output_path))
+            if adm_errors:
+                for err in adm_errors:
+                    print(f"  WARN: {err}")
+            else:
+                print("  ADM/BW64 validated OK")
         
         print("=" * 60)
         print("Pipeline complete")
@@ -186,11 +216,28 @@ class SpatialSeedPipeline:
         if export_adm:
             print(f"ADM/BW64: {adm_output_path}")
         
+        # Build scene info for UI
+        scene_info = {
+            "frame_count": len(scene.get("frames", [])),
+            "audio_object_entries": sum(
+                1 for f in scene.get("frames", [])
+                for n in f.get("nodes", [])
+                if n.get("type") == "audio_object"
+            ),
+            "bed_entries": sum(
+                1 for f in scene.get("frames", [])
+                for n in f.get("nodes", [])
+                if n.get("type") in ("direct_speaker", "LFE")
+            ),
+        }
+
         return {
             "manifest": manifest,
+            "classifications": classifications,
             "style_vector": style_vector.tolist(),
             "lusid_package": str(lusid_package_dir),
             "keyframe_stats": stats,
+            "scene_info": scene_info,
         }
 
 

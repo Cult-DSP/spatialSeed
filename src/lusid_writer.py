@@ -9,7 +9,8 @@ Responsibilities:
 - Emit delta frames (only changing nodes)
 - Include bed/direct-speaker nodes at t=0
 
-Per spec: lowLevelSpecsV1.md § 3, agents.md § 4, 8
+Per spec: lowLevelSpecsV1.md 3, agents.md 4, 8
+Uses LUSID/src/scene.py dataclasses when available, falls back to dicts.
 """
 
 import json
@@ -20,258 +21,230 @@ from pathlib import Path
 class LUSIDSceneWriter:
     """
     Writes LUSID Scene v0.5.x JSON files.
-    
-    Per spec (lowLevelSpecsV1.md § 3):
+
+    Per spec (lowLevelSpecsV1.md 3):
     - version: "0.5"
     - sampleRate: 48000
     - timeUnit: "seconds"
     - frames: delta frames (changing nodes only)
     """
-    
-    # Direct speaker template (per agents.md § 5)
+
+    # Direct speaker template (per agents.md 5, LUSID schema v0.5)
+    # NOTE: channelName is NOT in the LUSID schema -- only id/type/cart/speakerLabel/channelID
     DIRECT_SPEAKER_TEMPLATE = [
-        {"id": "1.1", "type": "direct_speaker", "speakerLabel": "RC_L", 
-         "channelName": "RoomCentricLeft", "channelID": "AC_00011001",
-         "cart": [-1.0, 1.0, 0.0]},
+        {"id": "1.1", "type": "direct_speaker", "speakerLabel": "RC_L",
+         "channelID": "AC_00011001", "cart": [-1.0, 1.0, 0.0]},
         {"id": "2.1", "type": "direct_speaker", "speakerLabel": "RC_R",
-         "channelName": "RoomCentricRight", "channelID": "AC_00011002",
-         "cart": [1.0, 1.0, 0.0]},
+         "channelID": "AC_00011002", "cart": [1.0, 1.0, 0.0]},
         {"id": "3.1", "type": "direct_speaker", "speakerLabel": "RC_C",
-         "channelName": "RoomCentricCenter", "channelID": "AC_00011003",
-         "cart": [0.0, 1.0, 0.0]},
+         "channelID": "AC_00011003", "cart": [0.0, 1.0, 0.0]},
         {"id": "5.1", "type": "direct_speaker", "speakerLabel": "RC_Lss",
-         "channelName": "RoomCentricLeftSideSurround", "channelID": "AC_00011005",
-         "cart": [-1.0, 0.0, 0.0]},
+         "channelID": "AC_00011005", "cart": [-1.0, 0.0, 0.0]},
         {"id": "6.1", "type": "direct_speaker", "speakerLabel": "RC_Rss",
-         "channelName": "RoomCentricRightSideSurround", "channelID": "AC_00011006",
-         "cart": [1.0, 0.0, 0.0]},
+         "channelID": "AC_00011006", "cart": [1.0, 0.0, 0.0]},
         {"id": "7.1", "type": "direct_speaker", "speakerLabel": "RC_Lrs",
-         "channelName": "RoomCentricLeftRearSurround", "channelID": "AC_00011007",
-         "cart": [-1.0, -1.0, 0.0]},
+         "channelID": "AC_00011007", "cart": [-1.0, -1.0, 0.0]},
         {"id": "8.1", "type": "direct_speaker", "speakerLabel": "RC_Rrs",
-         "channelName": "RoomCentricRightRearSurround", "channelID": "AC_00011008",
-         "cart": [1.0, -1.0, 0.0]},
+         "channelID": "AC_00011008", "cart": [1.0, -1.0, 0.0]},
         {"id": "9.1", "type": "direct_speaker", "speakerLabel": "RC_Lts",
-         "channelName": "RoomCentricLeftTopSurround", "channelID": "AC_00011009",
-         "cart": [-1.0, 0.0, 1.0]},
+         "channelID": "AC_00011009", "cart": [-1.0, 0.0, 1.0]},
         {"id": "10.1", "type": "direct_speaker", "speakerLabel": "RC_Rts",
-         "channelName": "RoomCentricRightTopSurround", "channelID": "AC_0001100a",
-         "cart": [1.0, 0.0, 1.0]},
+         "channelID": "AC_0001100a", "cart": [1.0, 0.0, 1.0]},
     ]
-    
+
     def __init__(self, sample_rate: int = 48000):
-        """
-        Initialize LUSID scene writer.
-        
-        Args:
-            sample_rate: Audio sample rate (default 48000)
-        """
         self.sample_rate = sample_rate
-        self.scene = {
-            "version": "0.5",
-            "sampleRate": sample_rate,
-            "timeUnit": "seconds",
-            "frames": [],
-        }
-    
-    def create_bed_frame(self) -> Dict:
-        """
-        Create initial frame with bed/direct-speaker nodes at t=0.
-        
-        Returns:
-            Frame dict with bed nodes
-            
-        Per spec (agents.md § 2.4, § 5):
-        - Always include bed groups 1-10 for ADM compatibility
-        - Beds are static (only appear at t=0)
-        - LFE is special: node 4.1, type "LFE"
-        """
-        nodes = []
-        
-        # Add direct speaker nodes
-        nodes.extend(self.DIRECT_SPEAKER_TEMPLATE)
-        
-        # Add LFE node (special case)
-        nodes.append({
-            "id": "4.1",
-            "type": "LFE",
-            # No cart for LFE
-        })
-        
-        return {
-            "time": 0.0,
-            "nodes": nodes,
-        }
-    
-    def create_audio_object_node(self, node_id: str,
-                                 x: float, y: float, z: float,
-                                 spread: Optional[float] = None) -> Dict:
-        """
-        Create audio_object node.
-        
-        Args:
-            node_id: Node ID (e.g., "11.1")
-            x, y, z: Cartesian position
-            spread: Optional angular spread
-            
-        Returns:
-            Node dict
-            
-        Per spec (lowLevelSpecsV1.md § 3.3):
-        - type: "audio_object"
-        - cart: [x, y, z]
-        - (future) spread: angular spread
-        """
-        node = {
+
+    # ------------------------------------------------------------------
+    # Node builders
+    # ------------------------------------------------------------------
+
+    @staticmethod
+    def _audio_object_node(node_id: str, x: float, y: float, z: float,
+                           gain: Optional[float] = None) -> Dict:
+        """Build an audio_object node dict."""
+        node: Dict = {
             "id": node_id,
             "type": "audio_object",
-            "cart": [x, y, z],
+            "cart": [round(x, 6), round(y, 6), round(z, 6)],
         }
-        
-        # TODO: Add spread parameter when supported
-        # if spread is not None:
-        #     node["spread"] = spread
-        
+        if gain is not None and gain != 1.0:
+            node["gain"] = round(gain, 6)
         return node
-    
-    def assemble_frames_from_keyframes(self, keyframes_dict: Dict) -> List[Dict]:
+
+    @staticmethod
+    def _lfe_node() -> Dict:
+        """Build the LFE node (group 4, no position)."""
+        return {"id": "4.1", "type": "LFE"}
+
+    # ------------------------------------------------------------------
+    # Frame assembly
+    # ------------------------------------------------------------------
+
+    def _build_bed_nodes(self) -> List[Dict]:
+        """Return list of bed/direct-speaker + LFE nodes for t=0."""
+        nodes: List[Dict] = []
+        nodes.extend(self.DIRECT_SPEAKER_TEMPLATE)
+        nodes.append(self._lfe_node())
+        return nodes
+
+    def assemble_frames(self, keyframes_dict: Dict) -> List[Dict]:
         """
-        Assemble LUSID frames from keyframe data.
-        
+        Convert per-node keyframes into LUSID delta frames.
+
         Args:
-            keyframes_dict: Dict of {node_id: [Keyframe, ...]}
-            
+            keyframes_dict: {node_id: [Keyframe, ...]} from GestureEngine.
+
         Returns:
-            List of frame dicts sorted by time
-            
-        Per spec (lowLevelSpecsV1.md § 3.2):
-        - Delta frames: frames include changing nodes only
-        - Every spatial source must have keyframe at t=0.0
+            List of frame dicts sorted by time.
+
+        Logic:
+        - Collect every unique timestamp across all nodes.
+        - At t=0 inject bed/direct-speaker nodes first.
+        - At each timestamp emit only the nodes that have a keyframe there
+          (delta-frame contract).
         """
-        # Collect all unique timestamps
-        all_times = set()
-        for keyframes in keyframes_dict.values():
+        # Build time -> [node_dict, ...] mapping
+        time_to_nodes: Dict[float, List[Dict]] = {}
+
+        for node_id, keyframes in keyframes_dict.items():
             for kf in keyframes:
-                all_times.add(kf.time)
-        
-        # Sort times
-        sorted_times = sorted(all_times)
-        
-        # Build frames
-        frames = []
-        
-        for t in sorted_times:
+                t = round(kf.time, 6)
+                node = self._audio_object_node(node_id, kf.x, kf.y, kf.z)
+                time_to_nodes.setdefault(t, []).append(node)
+
+        # Ensure t=0 exists (should always, but defensive)
+        if 0.0 not in time_to_nodes:
+            time_to_nodes[0.0] = []
+
+        # Sort by time and build frames
+        frames: List[Dict] = []
+        for t in sorted(time_to_nodes.keys()):
             nodes = []
-            
-            # Add bed frame at t=0
             if t == 0.0:
-                bed_frame = self.create_bed_frame()
-                nodes.extend(bed_frame["nodes"])
-            
-            # Add audio objects with keyframes at this time
-            for node_id, keyframes in keyframes_dict.items():
-                for kf in keyframes:
-                    if kf.time == t:
-                        node = self.create_audio_object_node(
-                            node_id, kf.x, kf.y, kf.z, kf.spread
-                        )
-                        nodes.append(node)
-            
-            if nodes:
-                frames.append({
-                    "time": t,
-                    "nodes": nodes,
-                })
-        
+                nodes.extend(self._build_bed_nodes())
+            nodes.extend(sorted(time_to_nodes[t], key=lambda n: n["id"]))
+            frames.append({"time": t, "nodes": nodes})
+
         return frames
-    
-    def write_scene(self, keyframes_dict: Dict, output_path: str):
+
+    # ------------------------------------------------------------------
+    # Write
+    # ------------------------------------------------------------------
+
+    def write_scene(self, keyframes_dict: Dict, output_path: str,
+                    metadata: Optional[Dict] = None) -> Dict:
         """
         Write complete LUSID scene to JSON file.
-        
+
         Args:
-            keyframes_dict: Dict of {node_id: [Keyframe, ...]}
-            output_path: Path to write scene.lusid.json
-            
-        Per spec (agents.md § 4.1):
-        - Exact filename: scene.lusid.json
+            keyframes_dict: {node_id: [Keyframe, ...]}
+            output_path:    path for scene.lusid.json
+            metadata:       optional top-level metadata dict
+
+        Returns:
+            The assembled scene dict (for inspection / tests).
         """
         print("Stage 8: LUSID Scene Assembly")
-        
-        # Assemble frames
-        frames = self.assemble_frames_from_keyframes(keyframes_dict)
-        self.scene["frames"] = frames
-        
-        print(f"  Assembled {len(frames)} frames")
-        
-        # Write to file
-        output_path = Path(output_path)
-        output_path.parent.mkdir(parents=True, exist_ok=True)
-        
-        with open(output_path, 'w') as f:
-            json.dump(self.scene, f, indent=2)
-        
-        print(f"  LUSID scene written to {output_path}")
-    
-    def add_agent_state_trace(self, frame_idx: int, node_id: str, 
-                             trace_data: Dict, feature_flag: bool = False):
-        """
-        Add agent_state trace node (optional, behind feature flag).
-        
-        Args:
-            frame_idx: Frame index to add trace to
-            node_id: Node ID for trace (e.g., "11.2")
-            trace_data: Trace data dict
-            feature_flag: Must be True to enable
-            
-        Per spec (agents.md § 9.2):
-        - agent_state nodes for minimal trace only
-        - Keep behind feature flag (can break strict consumers)
-        """
-        if not feature_flag:
-            return
-        
-        # TODO: Add agent_state node to frame
-        # Format: {"id": node_id, "type": "agent_state", ...trace_data}
-        pass
-    
-    def validate_scene(self) -> bool:
-        """
-        Validate LUSID scene structure.
-        
-        Returns:
-            True if valid, False otherwise
-            
-        Basic validation:
-        - Check required fields
-        - Verify all audio objects have t=0 keyframe
-        - Check for duplicate node IDs within frames
-        - Verify frames are sorted by time
-        """
-        # TODO: Implement validation
-        # - Check version, sampleRate, timeUnit, frames exist
-        # - Check frames are sorted by time
-        # - Verify all audio objects appear at t=0
-        # - Check for duplicate node IDs within frames
-        
-        return True
 
+        frames = self.assemble_frames(keyframes_dict)
 
-def load_direct_speaker_template(template_path: str) -> List[Dict]:
-    """
-    Load direct speaker template from JSON file.
-    
-    Args:
-        template_path: Path to directSpeakerData.json
-        
-    Returns:
-        List of direct speaker node dicts
-        
-    Per spec (agents.md § 5):
-    - Direct speaker mapping is pluggable
-    - Must expand to other mappings beyond current template
-    """
-    with open(template_path, 'r') as f:
-        template = json.load(f)
-    
-    return template
+        scene: Dict = {
+            "version": "0.5",
+            "sampleRate": self.sample_rate,
+            "timeUnit": "seconds",
+            "frames": frames,
+        }
+        if metadata:
+            scene["metadata"] = metadata
+
+        # Count stats
+        n_audio_obj = sum(
+            1 for f in frames for n in f["nodes"] if n["type"] == "audio_object"
+        )
+        n_beds = sum(
+            1 for f in frames for n in f["nodes"]
+            if n["type"] in ("direct_speaker", "LFE")
+        )
+        print(f"  {len(frames)} frames, {n_audio_obj} audio-object entries, "
+              f"{n_beds} bed/LFE entries")
+
+        # Write
+        out = Path(output_path)
+        out.parent.mkdir(parents=True, exist_ok=True)
+        with open(out, "w") as fh:
+            json.dump(scene, fh, indent=2)
+        print(f"  Written to {out}")
+
+        return scene
+
+    # ------------------------------------------------------------------
+    # Validation
+    # ------------------------------------------------------------------
+
+    @staticmethod
+    def validate_scene(scene: Dict) -> List[str]:
+        """
+        Validate a LUSID scene dict.
+
+        Returns a list of error strings (empty = valid).
+        Checks:
+        - Required top-level keys
+        - Frames sorted by time
+        - Every audio_object group has a keyframe at t=0
+        - No duplicate node IDs within a single frame
+        - Bed/LFE presence at t=0
+        """
+        errors: List[str] = []
+
+        # Top-level keys
+        for key in ("version", "frames"):
+            if key not in scene:
+                errors.append(f"Missing top-level key '{key}'")
+        if scene.get("version") != "0.5":
+            errors.append(f"Expected version '0.5', got '{scene.get('version')}'")
+
+        frames = scene.get("frames", [])
+        if not frames:
+            errors.append("Scene has no frames")
+            return errors
+
+        # Frames sorted
+        times = [f["time"] for f in frames]
+        if times != sorted(times):
+            errors.append("Frames are not sorted by time")
+
+        # t=0 checks
+        t0_frame = frames[0] if frames[0]["time"] == 0.0 else None
+        if t0_frame is None:
+            errors.append("First frame is not at t=0.0")
+        else:
+            t0_ids = {n["id"] for n in t0_frame["nodes"]}
+            # Check beds present
+            for bed_id in ["1.1", "2.1", "3.1", "5.1", "6.1", "7.1", "8.1",
+                           "9.1", "10.1"]:
+                if bed_id not in t0_ids:
+                    errors.append(f"Bed node {bed_id} missing at t=0")
+            if "4.1" not in t0_ids:
+                errors.append("LFE node 4.1 missing at t=0")
+
+            # Every audio_object group that appears anywhere must also appear at t=0
+            all_ao_ids: set = set()
+            for f in frames:
+                for n in f["nodes"]:
+                    if n["type"] == "audio_object":
+                        all_ao_ids.add(n["id"])
+            missing_at_t0 = all_ao_ids - t0_ids
+            for mid in sorted(missing_at_t0):
+                errors.append(f"audio_object {mid} missing at t=0")
+
+        # Duplicate IDs within frames
+        for f in frames:
+            ids_in_frame = [n["id"] for n in f["nodes"]]
+            seen: set = set()
+            for nid in ids_in_frame:
+                if nid in seen:
+                    errors.append(f"Duplicate node ID '{nid}' in frame t={f['time']}")
+                seen.add(nid)
+
+        return errors
