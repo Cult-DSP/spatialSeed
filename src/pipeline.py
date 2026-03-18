@@ -11,15 +11,15 @@ from pathlib import Path
 from typing import Optional, Tuple
 
 # Import all pipeline modules
-from src.session import SessionManager
-from src.audio_io import AudioNormalizer
+from src.core.session import SessionManager
+from src.audio.audio_io import AudioNormalizer
 from src.mir.extract import MIRExtractor
 from src.mir.classify import InstrumentClassifier
-from src.seed_matrix import SeedMatrix
-from src.spf import SPFResolver
-from src.placement import PlacementEngine
-from src.gesture_engine import GestureEngine
-from src.lusid_writer import LUSIDSceneWriter
+from src.mapping.seed_matrix import SeedMatrix
+from src.spatial.spf import SPFResolver
+from src.spatial.placement import PlacementEngine
+from src.spatial.gesture_engine import GestureEngine
+from src.export.lusid_writer import LUSIDSceneWriter
 from src.export.lusid_package import LUSIDPackageExporter
 from src.export.adm_bw64 import ADMBw64Exporter
 

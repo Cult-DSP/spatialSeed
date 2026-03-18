@@ -53,7 +53,7 @@ repo root so that `from src.* import ...` resolves correctly.
 - [DONE] Spatial processing: spf.py, placement.py, gesture_engine.py (all 8 stages pass end-to-end)
 - [DONE] LUSID output: lusid_writer.py (scene.lusid.json), export/lusid_package.py (containsAudio.json, WAV copy)
 - [DONE] Streamlit UI: ui/app.py with stem discovery, category/role overrides, pipeline execution, results display
-- [TODO] Organize files in src to be in appropriate subfolders
+- [DONE] Organize files in src to be in appropriate subfolders
 - [TODO] SPF reference research data -- research panning conventions (Dolby Atmos best practices, ITU-R BS.2051, mixing engineer references), academic spatial audio research. Save as CSVs/JSONs in data/spf_reference/. Use to ground the hand-tuned profiles in spf.py with cited sources.
 - [TODO] Expand SPF profile coverage -- current spf.py has 10 profiles. Missing: percussion/percussion, strings/lead, keys/lead, pads/fx, bass/rhythm, vocals/rhythm (backing), horns/brass, woodwinds, choir, sound design. Informed by SPF reference data above.
 - [TODO] LUSID schema validation -- lusid_writer.py validate_scene() does custom checks but never validates against LUSID/schema/lusid_scene_v0.5.schema.json. Add jsonschema validation pass (jsonschema already in requirements.txt).

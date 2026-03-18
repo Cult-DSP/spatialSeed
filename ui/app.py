@@ -31,7 +31,7 @@ if str(_REPO_ROOT) not in sys.path:
     sys.path.insert(0, str(_REPO_ROOT))
 
 from src.pipeline import SpatialSeedPipeline
-from src.session import SessionManager
+from src.core.session import SessionManager
 from src.mir.classify import InstrumentClassifier
 
 

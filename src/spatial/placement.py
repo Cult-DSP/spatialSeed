@@ -16,7 +16,7 @@ import numpy as np
 from typing import Dict, List, Tuple
 import logging
 
-from src.spf import StyleProfile, clamp_to_cube
+from src.spatial.spf import StyleProfile, clamp_to_cube
 
 logger = logging.getLogger("spatialSeed.placement")
 

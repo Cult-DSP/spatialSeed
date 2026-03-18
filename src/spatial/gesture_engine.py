@@ -17,7 +17,7 @@ import numpy as np
 from typing import Dict, List, Tuple, Optional
 from dataclasses import dataclass
 
-from src.spf import StyleProfile, clamp_to_cube
+from src.spatial.spf import StyleProfile, clamp_to_cube
 
 
 @dataclass

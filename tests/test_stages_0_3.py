@@ -28,8 +28,8 @@ from pathlib import Path
 REPO_ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(REPO_ROOT))
 
-from src.session import SessionManager
-from src.audio_io import AudioNormalizer
+from src.core.session import SessionManager
+from src.audio.audio_io import AudioNormalizer
 from src.mir.extract import MIRExtractor
 from src.mir.classify import InstrumentClassifier
 
