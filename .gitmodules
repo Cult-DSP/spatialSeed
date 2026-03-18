@@ -4,3 +4,6 @@
 [submodule "essentia"]
 	path = essentia
 	url = https://github.com/MTG/essentia
+[submodule "cult_transcoder"]
+	path = cult_transcoder
+	url = https://github.com/Cult-DSP/cult_transcoder
