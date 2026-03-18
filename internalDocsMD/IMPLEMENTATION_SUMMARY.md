@@ -247,7 +247,8 @@ Classification accuracy (both filename and MIR-only paths produce correct result
 
 ### [TODO] Remaining
 
-- Additional test coverage (unit tests per module)
+- Additional test coverage (unit tests using `unittest` for the remainder of the modules)
+- Integration of `config/defaults.json` across `src` modules to remove any hardcoded variables (such as sample rates or threshold epsilons).
 - UI polish (2D Seed Matrix canvas visualization, real-time progress per stage)
 
 ### Notes on TODOs

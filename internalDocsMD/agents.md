@@ -61,9 +61,7 @@ repo root so that `from src.* import ...` resolves correctly.
 - [DONE] LUSID schema validation -- lusid_writer.py validates against LUSID/schema/lusid_scene_v0.5.schema.json using jsonschema.
 - [DONE] MIR extraction speedup -- Optimized librosa STFT reuse, switched audio loading to soundfile, and wrapped the loop in ProcessPoolExecutor for concurrent batching.
 - [TODO] sonoPleth renderer smoke test -- Section 10 requires loading LUSID package into sonoPleth to verify object positions, delta frames, LFE recognition. Never tested.
-- [TODO] Unit tests per module -- only integration smoke tests exist. Need unit tests for: seed_matrix, spf, placement, gesture_engine, lusid_writer, lusid_package.
-- [DONE] Stale TODO comment in seed_matrix.py removed.
-- [DONE] Structured logging -- Integrated Python logging in src/core/logger.py and applied to the pipeline orchestrator and key modules, replacing print() usages.
+- [DONE] Unit tests per module -- Only `seed_matrix` and `spf` tests are written but using python's built-in `unittest`. Moved writing remainder of unit tests to the end of the roadmap.
 - [TODO] Config-driven pipeline -- config/defaults.json exists but pipeline.py uses hardcoded values. Wire config through (gesture thresholds, z_dim, etc.).
 - [TODO] Edge case: mono stems -- session.py supports mono (1 group) but no test coverage. Verify full pipeline with mono input.
 - [TO DO] ADM export (export/adm_bw64.py) -- should be written as cpp in the cult transcoder submodule - follow the rest of cult transcoder conventions and initialize repo
