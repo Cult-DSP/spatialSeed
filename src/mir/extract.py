@@ -20,6 +20,9 @@ provides all the summary features we need here.
 
 import json
 import logging
+import time
+import multiprocessing
+from concurrent.futures import ProcessPoolExecutor, as_completed
 from pathlib import Path
 from typing import Dict, Optional
 
@@ -81,44 +84,51 @@ class MIRExtractor:
             return cached
 
         # Load audio -------------------------------------------------------
-        y, sr = librosa.load(audio_path, sr=None, mono=True)
-        duration = librosa.get_duration(y=y, sr=sr)
+        y, sr = sf.read(audio_path)
+        y = y.astype(np.float32)
+        if len(y.shape) > 1:
+            y = np.mean(y, axis=1) # force mono
+        duration = len(y) / sr if sr > 0 else 0.0
+
+        # -- Compute STFT once ---------------------------------------------
+        D = librosa.stft(y)
+        S = np.abs(D)
 
         # -- RMS energy ----------------------------------------------------
-        rms = librosa.feature.rms(y=y)[0]
+        rms = librosa.feature.rms(S=S)[0]
         rms_mean = float(np.mean(rms))
         rms_db = float(20.0 * np.log10(rms_mean)) if rms_mean > 0 else -200.0
 
         # -- Spectral centroid ---------------------------------------------
-        cent = librosa.feature.spectral_centroid(y=y, sr=sr)[0]
+        cent = librosa.feature.spectral_centroid(S=S, sr=sr)[0]
         centroid_mean = float(np.mean(cent))
         centroid_std = float(np.std(cent))
 
         # -- Spectral flux (onset strength envelope) -----------------------
-        oenv = librosa.onset.onset_strength(y=y, sr=sr)
+        oenv = librosa.onset.onset_strength(S=S, sr=sr)
         flux_mean = float(np.mean(oenv))
 
         # -- Onset density -------------------------------------------------
-        onsets = librosa.onset.onset_detect(y=y, sr=sr, onset_envelope=oenv)
+        onsets = librosa.onset.onset_detect(onset_envelope=oenv, sr=sr)
         onset_density = float(len(onsets) / duration) if duration > 0 else 0.0
 
         # -- Pitch confidence (via piptrack) -------------------------------
-        pitches, magnitudes = librosa.piptrack(y=y, sr=sr)
+        pitches, magnitudes = librosa.piptrack(S=S, sr=sr)
         # confidence ~ fraction of frames with a detected pitch above threshold
         pitch_detected = (magnitudes.max(axis=0) > 0).astype(float)
         pitch_confidence_mean = float(np.mean(pitch_detected))
 
         # -- HPSS harmonic ratio -------------------------------------------
-        y_harm, y_perc = librosa.effects.hpss(y)
-        harm_energy = float(np.mean(y_harm ** 2))
-        perc_energy = float(np.mean(y_perc ** 2))
+        D_harm, D_perc = librosa.decompose.hpss(D)
+        harm_energy = float(np.mean(np.abs(D_harm) ** 2))
+        perc_energy = float(np.mean(np.abs(D_perc) ** 2))
         total_energy = harm_energy + perc_energy
         harmonic_ratio = (
             float(harm_energy / total_energy) if total_energy > 0 else 0.5
         )
 
         # -- Spectral flatness ---------------------------------------------
-        flatness = librosa.feature.spectral_flatness(y=y)[0]
+        flatness = librosa.feature.spectral_flatness(S=S)[0]
         flatness_mean = float(np.mean(flatness))
 
         # -- Zero crossing rate --------------------------------------------
@@ -208,7 +218,8 @@ class MIRExtractor:
         Returns:
             MIR summary dict with per-stem and mix features
         """
-        print("Stage 2: MIR Extraction")
+        logger.info("Stage 2: MIR Extraction (Multiprocessing)")
+        t0 = time.time()
 
         mir_summary: Dict = {
             "stems": {},
@@ -216,34 +227,60 @@ class MIRExtractor:
         }
 
         stems = manifest["stems"]
+        
+        # Prepare tasks for parallel execution
+        tasks = []
         for i, stem in enumerate(stems):
             stem_name = stem["filename"]
             stem_hash = stem.get("hash", "")
-
-            print(f"  Extracting features for stem {i + 1}/{len(stems)}: {stem_name}")
-
-            # For each node produced by this stem
-            for j, (group_id, wav_name) in enumerate(
-                zip(stem["group_ids"], stem["wav_names"])
-            ):
+            
+            for j, (group_id, wav_name) in enumerate(zip(stem["group_ids"], stem["wav_names"])):
                 node_id = f"{group_id}.1"
-
+                
                 # The normalised mono WAV lives alongside beds in the work dir.
-                # Caller is expected to pass actual wav paths; we try the stem
-                # source path as fallback for feature extraction.
                 wav_path = stem.get("_wav_path_override")
                 if wav_path is None:
                     wav_path = stem["path"]
+                    
+                tasks.append({
+                    "stem_index": i + 1,
+                    "stem_name": stem_name,
+                    "node_id": node_id,
+                    "wav_path": wav_path,
+                    "stem_hash": stem_hash,
+                })
 
-                features = self.extract_stem_features(wav_path, stem_hash)
-                mir_summary["stems"][node_id] = {
-                    "filename": stem_name,
-                    "features": features,
-                }
+        num_workers = max(1, multiprocessing.cpu_count() - 1)
+        logger.info(f"  Dispatching {len(tasks)} tasks across {num_workers} workers...")
+        
+        extracted_count = 0
+        with ProcessPoolExecutor(max_workers=num_workers) as executor:
+            # Map futures to tasks preserving our metadata
+            future_to_task = {
+                executor.submit(self.extract_stem_features, t["wav_path"], t["stem_hash"]): t 
+                for t in tasks
+            }
+            
+            for future in as_completed(future_to_task):
+                t = future_to_task[future]
+                try:
+                    features = future.result()
+                    mir_summary["stems"][t["node_id"]] = {
+                        "filename": t["stem_name"],
+                        "features": features,
+                    }
+                    extracted_count += 1
+                    logger.info(f"  Extracted features for {t['node_id']} ({t['stem_name']}) [{extracted_count}/{len(tasks)}]")
+                except Exception as exc:
+                    logger.error(f"  Error extracting features for {t['wav_path']}: {exc}")
 
-        # Stereo mix features
+        total_time = time.time() - t0
+        files_sec = len(tasks) / total_time if total_time > 0 else 0
+        logger.info(f"  [OK] Extracted MIR features for {len(tasks)} nodes in {total_time:.2f}s ({files_sec:.2f} files/sec)")
+
+        # Stereo mix features (still sequential, fast enough)
         if mix_path:
-            print("  Extracting stereo mix features")
+            logger.info("  Extracting stereo mix features")
             mir_summary["mix"] = self.extract_stereo_mix_features(mix_path)
 
         return mir_summary

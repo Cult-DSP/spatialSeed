@@ -31,6 +31,8 @@ If you are continuing implementation work on this project:
 
 **Environment setup:**
 
+🚨 **CRITICAL RULE**: DO NOT run `pip install` commands. Agents must use the pre-configured `.venv` and assume all necessary dependencies are already present inside the environment. If a module is missing, gracefully degrade or notify the user rather than installing arbitrary packages.
+
 ```bash
 # One-time: create .venv, install deps, init submodules
 ./init.sh
@@ -56,12 +58,12 @@ repo root so that `from src.* import ...` resolves correctly.
 - [DONE] Organize files in src to be in appropriate subfolders
 - [DONE] SPF reference research data -- loaded spatial reference JSON sheets and mapped spf.py default profiles to cited industry sources (MusicGuyMixing, ProAudioFiles, DrumAudioEditing, etc.)
 - [DONE] Expand SPF profile coverage -- extended spf.py profiles to include backing vocals, percussion, lead keys, lead strings, brass, woodwinds, choir, and sound design.
-- [TODO] LUSID schema validation -- lusid_writer.py validate_scene() does custom checks but never validates against LUSID/schema/lusid_scene_v0.5.schema.json. Add jsonschema validation pass (jsonschema already in requirements.txt).
-  [to do ] mir extraction is very slow. likely way to precise - should be chunked roughly - potentially add a config parameter for resolution quality of analysis. eveluate moving to essenetia, but librosa is probably easier for prototyuping. it currently takes several minutes but should be less than 1 minute
+- [DONE] LUSID schema validation -- lusid_writer.py validates against LUSID/schema/lusid_scene_v0.5.schema.json using jsonschema.
+- [DONE] MIR extraction speedup -- Optimized librosa STFT reuse, switched audio loading to soundfile, and wrapped the loop in ProcessPoolExecutor for concurrent batching.
 - [TODO] sonoPleth renderer smoke test -- Section 10 requires loading LUSID package into sonoPleth to verify object positions, delta frames, LFE recognition. Never tested.
 - [TODO] Unit tests per module -- only integration smoke tests exist. Need unit tests for: seed_matrix, spf, placement, gesture_engine, lusid_writer, lusid_package.
-- [TODO] Stale TODO comment in seed_matrix.py -- line 64 says "TODO: Implement analytic mapping" but the mapping IS implemented below it. Misleading for new agents.
-- [TODO] Structured logging -- Section 11 requires structured logging for discovery, ID allocation, clamp events, keyframe counts, channel order, transcoder calls. Currently uses print(). Standardise to Python logging.
+- [DONE] Stale TODO comment in seed_matrix.py removed.
+- [DONE] Structured logging -- Integrated Python logging in src/core/logger.py and applied to the pipeline orchestrator and key modules, replacing print() usages.
 - [TODO] Config-driven pipeline -- config/defaults.json exists but pipeline.py uses hardcoded values. Wire config through (gesture thresholds, z_dim, etc.).
 - [TODO] Edge case: mono stems -- session.py supports mono (1 group) but no test coverage. Verify full pipeline with mono input.
 - [TO DO] ADM export (export/adm_bw64.py) -- should be written as cpp in the cult transcoder submodule - follow the rest of cult transcoder conventions and initialize repo

@@ -99,6 +99,8 @@ spatialSeed/
 ### Stage 2: MIR Extract (src/mir/extract.py)
 
 - librosa-based feature extraction (not Essentia -- Essentia is optional for classification only)
+- Uses `soundfile` for ultra-fast loading combined with a shared `librosa.stft` to significantly optimize redundant time-to-frequency conversions.
+- Parallelized batch extraction leveraging `concurrent.futures.ProcessPoolExecutor` to crunch large stem counts instantly on multicore machines.
 - Per-stem features: RMS energy, spectral centroid (mean+std), spectral flux, onset density,
   pitch confidence (piptrack), harmonic ratio (HPSS), spectral flatness, zero-crossing rate
 - Stereo mix features (mid/side width, L/R energy balance, L/R correlation)
