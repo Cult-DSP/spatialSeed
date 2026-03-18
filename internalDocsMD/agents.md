@@ -54,8 +54,8 @@ repo root so that `from src.* import ...` resolves correctly.
 - [DONE] LUSID output: lusid_writer.py (scene.lusid.json), export/lusid_package.py (containsAudio.json, WAV copy)
 - [DONE] Streamlit UI: ui/app.py with stem discovery, category/role overrides, pipeline execution, results display
 - [DONE] Organize files in src to be in appropriate subfolders
-- [TODO] SPF reference research data -- research panning conventions (Dolby Atmos best practices, ITU-R BS.2051, mixing engineer references), academic spatial audio research. Save as CSVs/JSONs in data/spf_reference/. Use to ground the hand-tuned profiles in spf.py with cited sources.
-- [TODO] Expand SPF profile coverage -- current spf.py has 10 profiles. Missing: percussion/percussion, strings/lead, keys/lead, pads/fx, bass/rhythm, vocals/rhythm (backing), horns/brass, woodwinds, choir, sound design. Informed by SPF reference data above.
+- [DONE] SPF reference research data -- loaded spatial reference JSON sheets and mapped spf.py default profiles to cited industry sources (MusicGuyMixing, ProAudioFiles, DrumAudioEditing, etc.)
+- [DONE] Expand SPF profile coverage -- extended spf.py profiles to include backing vocals, percussion, lead keys, lead strings, brass, woodwinds, choir, and sound design.
 - [TODO] LUSID schema validation -- lusid_writer.py validate_scene() does custom checks but never validates against LUSID/schema/lusid_scene_v0.5.schema.json. Add jsonschema validation pass (jsonschema already in requirements.txt).
 - [TODO] sonoPleth renderer smoke test -- Section 10 requires loading LUSID package into sonoPleth to verify object positions, delta frames, LFE recognition. Never tested.
 - [TODO] Unit tests per module -- only integration smoke tests exist. Need unit tests for: seed_matrix, spf, placement, gesture_engine, lusid_writer, lusid_package.

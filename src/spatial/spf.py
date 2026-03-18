@@ -52,6 +52,9 @@ class InstrumentProfile:
     flux_sensitivity: float
     brightness_sensitivity: float
 
+    # Reference citation for the spatial prior
+    source_citation: Optional[str] = None
+
 
 @dataclass
 class StyleProfile:
@@ -142,7 +145,7 @@ class SPFResolver:
 
     def _init_default_profiles(self):
         """
-        Curated instrument profiles.
+        Curated instrument profiles grounded in external reference sources.
 
         Convention:
         - azimuth 0 = dead centre (front).  Positive = right.
@@ -150,7 +153,7 @@ class SPFResolver:
         - distance 1.0 = far wall of cube.
         """
 
-        # -- vocals (lead) -- front-centre, gentle drift
+        # -- vocals (lead) -- front-centre (MusicGuyMixing 2023)
         self.instrument_profiles[("vocals", "lead")] = InstrumentProfile(
             category="vocals", role="lead",
             base_azimuth_deg=0.0, azimuth_spread_deg=15.0,
@@ -158,25 +161,26 @@ class SPFResolver:
             base_distance=0.65,
             default_spread=0.12,
             motion_archetype="gentle_drift",
-            energy_sensitivity=0.15,
-            flux_sensitivity=0.10,
-            brightness_sensitivity=0.25,
+            energy_sensitivity=0.15, flux_sensitivity=0.10, brightness_sensitivity=0.25,
+            source_citation="MusicGuyMixing (2023): Lead Vocal dead center"
         )
 
-        # -- vocals (backing / unknown role) -- slightly wider
-        self.instrument_profiles[("vocals", "unknown")] = InstrumentProfile(
-            category="vocals", role="unknown",
-            base_azimuth_deg=0.0, azimuth_spread_deg=35.0,
+        # -- vocals (backing / rhythm) -- +/- 60 deg (ProAudioFiles 2018)
+        self.instrument_profiles[("vocals", "rhythm")] = InstrumentProfile(
+            category="vocals", role="rhythm",
+            base_azimuth_deg=60.0, azimuth_spread_deg=20.0,
             base_elevation_deg=8.0, elevation_range_deg=15.0,
             base_distance=0.70,
             default_spread=0.18,
             motion_archetype="gentle_drift",
-            energy_sensitivity=0.15,
-            flux_sensitivity=0.10,
-            brightness_sensitivity=0.20,
+            energy_sensitivity=0.15, flux_sensitivity=0.10, brightness_sensitivity=0.20,
+            source_citation="ProAudioFiles (2018): Backing vocals panned hard L/R at 60 deg"
         )
+        
+        # -- vocals (unknown) -- generic fallback
+        self.instrument_profiles[("vocals", "unknown")] = self.instrument_profiles[("vocals", "rhythm")]
 
-        # -- bass -- centre, low, mostly static
+        # -- bass (bass) -- center, low (MusicGuyMixing 2023)
         self.instrument_profiles[("bass", "bass")] = InstrumentProfile(
             category="bass", role="bass",
             base_azimuth_deg=0.0, azimuth_spread_deg=10.0,
@@ -184,64 +188,98 @@ class SPFResolver:
             base_distance=0.55,
             default_spread=0.20,
             motion_archetype="static",
-            energy_sensitivity=0.08,
-            flux_sensitivity=0.05,
-            brightness_sensitivity=0.0,
+            energy_sensitivity=0.08, flux_sensitivity=0.05, brightness_sensitivity=0.0,
+            source_citation="MusicGuyMixing (2023): Electric/Double Bass center"
+        )
+        
+        # -- bass (rhythm) -- essentially the same spatial profile as bass
+        self.instrument_profiles[("bass", "rhythm")] = InstrumentProfile(
+            category="bass", role="rhythm",
+            base_azimuth_deg=0.0, azimuth_spread_deg=10.0,
+            base_elevation_deg=-5.0, elevation_range_deg=5.0,
+            base_distance=0.55,
+            default_spread=0.20,
+            motion_archetype="static",
+            energy_sensitivity=0.10, flux_sensitivity=0.05, brightness_sensitivity=0.0,
+            source_citation="MusicGuyMixing (2023): Bass rhythms center"
         )
 
-        # -- drums (percussion) -- wide spread, reactive
+        # -- drums (percussion) / Overheads / Toms -- wide spread (DrumAudioEditing 2025 / ProAudioFiles 2018)
         self.instrument_profiles[("drums", "percussion")] = InstrumentProfile(
             category="drums", role="percussion",
-            base_azimuth_deg=0.0, azimuth_spread_deg=50.0,
+            base_azimuth_deg=0.0, azimuth_spread_deg=65.0,
             base_elevation_deg=0.0, elevation_range_deg=20.0,
             base_distance=0.72,
             default_spread=0.22,
             motion_archetype="reactive",
-            energy_sensitivity=0.35,
-            flux_sensitivity=0.50,
-            brightness_sensitivity=0.15,
+            energy_sensitivity=0.35, flux_sensitivity=0.50, brightness_sensitivity=0.15,
+            source_citation="DrumAudioEditing (2025): Overheads +/- 75deg, toms 60-90deg"
         )
+        
+        # -- percussion (rhythm) -- eg tambourine (MusicGuyMixing +/- 30 deg)
+        self.instrument_profiles[("percussion", "rhythm")] = InstrumentProfile(
+            category="percussion", role="rhythm",
+            base_azimuth_deg=30.0, azimuth_spread_deg=15.0,
+            base_elevation_deg=0.0, elevation_range_deg=10.0,
+            base_distance=0.70,
+            default_spread=0.20,
+            motion_archetype="reactive",
+            energy_sensitivity=0.30, flux_sensitivity=0.45, brightness_sensitivity=0.20,
+            source_citation="MusicGuyMixing (2023): Tambourine 30deg L/R"
+        )
+        
+        # -- percussion (percussion)
+        self.instrument_profiles[("percussion", "percussion")] = self.instrument_profiles[("percussion", "rhythm")]
 
-        # -- guitar (rhythm) -- off-centre, moderate drift
+        # -- guitar (rhythm) -- hard left/right (MusicGuyMixing: Acoustic/Electric +/- 90 deg)
         self.instrument_profiles[("guitar", "rhythm")] = InstrumentProfile(
             category="guitar", role="rhythm",
-            base_azimuth_deg=-25.0, azimuth_spread_deg=30.0,
+            base_azimuth_deg=90.0, azimuth_spread_deg=15.0,
             base_elevation_deg=0.0, elevation_range_deg=10.0,
             base_distance=0.65,
             default_spread=0.15,
             motion_archetype="gentle_drift",
-            energy_sensitivity=0.20,
-            flux_sensitivity=0.15,
-            brightness_sensitivity=0.20,
+            energy_sensitivity=0.20, flux_sensitivity=0.15, brightness_sensitivity=0.20,
+            source_citation="MusicGuyMixing (2023): Electric Rhythm hard left/right"
         )
 
-        # -- guitar (lead) -- slightly off-centre the other side
+        # -- guitar (lead) -- center (MusicGuyMixing 2023)
         self.instrument_profiles[("guitar", "lead")] = InstrumentProfile(
             category="guitar", role="lead",
-            base_azimuth_deg=15.0, azimuth_spread_deg=20.0,
+            base_azimuth_deg=0.0, azimuth_spread_deg=20.0,
             base_elevation_deg=3.0, elevation_range_deg=8.0,
             base_distance=0.60,
             default_spread=0.12,
             motion_archetype="gentle_drift",
-            energy_sensitivity=0.20,
-            flux_sensitivity=0.15,
-            brightness_sensitivity=0.25,
+            energy_sensitivity=0.20, flux_sensitivity=0.15, brightness_sensitivity=0.25,
+            source_citation="MusicGuyMixing (2023): Electric Lead center"
         )
 
-        # -- keys (rhythm) -- slight right, ear-level
+        # -- keys (rhythm) -- Piano Support (MusicGuyMixing 2023: +/- 30 to 90 deg)
         self.instrument_profiles[("keys", "rhythm")] = InstrumentProfile(
             category="keys", role="rhythm",
-            base_azimuth_deg=20.0, azimuth_spread_deg=25.0,
+            base_azimuth_deg=45.0, azimuth_spread_deg=30.0,
             base_elevation_deg=0.0, elevation_range_deg=10.0,
             base_distance=0.65,
             default_spread=0.18,
             motion_archetype="gentle_drift",
-            energy_sensitivity=0.15,
-            flux_sensitivity=0.10,
-            brightness_sensitivity=0.20,
+            energy_sensitivity=0.15, flux_sensitivity=0.10, brightness_sensitivity=0.20,
+            source_citation="MusicGuyMixing (2023): Piano support 30deg to hard panned"
+        )
+        
+        # -- keys (lead) -- Synth Lead (MusicGuyMixing 2023: Center)
+        self.instrument_profiles[("keys", "lead")] = InstrumentProfile(
+            category="keys", role="lead",
+            base_azimuth_deg=0.0, azimuth_spread_deg=15.0,
+            base_elevation_deg=5.0, elevation_range_deg=15.0,
+            base_distance=0.65,
+            default_spread=0.15,
+            motion_archetype="gentle_drift",
+            energy_sensitivity=0.20, flux_sensitivity=0.15, brightness_sensitivity=0.30,
+            source_citation="MusicGuyMixing (2023): Synth Lead center"
         )
 
-        # -- strings (rhythm) -- wide, slightly elevated, gentle drift
+        # -- strings (rhythm) -- wide, slightly elevated
         self.instrument_profiles[("strings", "rhythm")] = InstrumentProfile(
             category="strings", role="rhythm",
             base_azimuth_deg=0.0, azimuth_spread_deg=55.0,
@@ -249,35 +287,93 @@ class SPFResolver:
             base_distance=0.75,
             default_spread=0.28,
             motion_archetype="gentle_drift",
-            energy_sensitivity=0.20,
-            flux_sensitivity=0.15,
-            brightness_sensitivity=0.30,
+            energy_sensitivity=0.20, flux_sensitivity=0.15, brightness_sensitivity=0.30,
+            source_citation="SpatialSeed default (pre-2026)"
+        )
+        
+        # -- strings (lead) -- slightly elevated & asymmetrical (Mock Data 2026: az -20, el 18)
+        self.instrument_profiles[("strings", "lead")] = InstrumentProfile(
+            category="strings", role="lead",
+            base_azimuth_deg=-20.0, azimuth_spread_deg=30.0,
+            base_elevation_deg=18.0, elevation_range_deg=25.0,
+            base_distance=0.70,
+            default_spread=0.25,
+            motion_archetype="gentle_drift",
+            energy_sensitivity=0.25, flux_sensitivity=0.20, brightness_sensitivity=0.25,
+            source_citation="Mock source (2026): Orchestral Strings Lead placement"
+        )
+        
+        # -- horns (brass) -- Mock Data 2026: az 28, el 12
+        self.instrument_profiles[("horns", "brass")] = InstrumentProfile(
+            category="horns", role="brass",
+            base_azimuth_deg=28.0, azimuth_spread_deg=25.0,
+            base_elevation_deg=12.0, elevation_range_deg=15.0,
+            base_distance=0.75,
+            default_spread=0.22,
+            motion_archetype="gentle_drift",
+            energy_sensitivity=0.30, flux_sensitivity=0.30, brightness_sensitivity=0.25,
+            source_citation="Mock source (2026): Orchestral Horns/Brass placement"
+        )
+        
+        # -- woodwinds (lead) -- Mock Data 2026: az -32, el 16
+        self.instrument_profiles[("woodwinds", "lead")] = InstrumentProfile(
+            category="woodwinds", role="lead",
+            base_azimuth_deg=-32.0, azimuth_spread_deg=20.0,
+            base_elevation_deg=16.0, elevation_range_deg=15.0,
+            base_distance=0.70,
+            default_spread=0.18,
+            motion_archetype="gentle_drift",
+            energy_sensitivity=0.20, flux_sensitivity=0.20, brightness_sensitivity=0.25,
+            source_citation="Mock source (2026): Chamber Woodwinds Lead placement"
+        )
+        
+        # -- choir (ambience) -- Mock Data 2026: az 0, el 58
+        self.instrument_profiles[("choir", "ambience")] = InstrumentProfile(
+            category="choir", role="ambience",
+            base_azimuth_deg=0.0, azimuth_spread_deg=80.0,
+            base_elevation_deg=58.0, elevation_range_deg=20.0,
+            base_distance=0.85,
+            default_spread=0.35,
+            motion_archetype="orbit",
+            energy_sensitivity=0.15, flux_sensitivity=0.10, brightness_sensitivity=0.15,
+            source_citation="Mock source (2026): Choral Ambience height placement"
         )
 
-        # -- pads (rhythm / ambience) -- wide, elevated, orbit-capable
+        # -- pads (rhythm / ambience / fx) -- synth pads (MusicGuyMixing 2023: +/- 90 deg)
         self.instrument_profiles[("pads", "rhythm")] = InstrumentProfile(
             category="pads", role="rhythm",
-            base_azimuth_deg=0.0, azimuth_spread_deg=70.0,
+            base_azimuth_deg=90.0, azimuth_spread_deg=50.0,
             base_elevation_deg=15.0, elevation_range_deg=25.0,
             base_distance=0.80,
             default_spread=0.35,
             motion_archetype="orbit",
-            energy_sensitivity=0.10,
-            flux_sensitivity=0.05,
-            brightness_sensitivity=0.15,
+            energy_sensitivity=0.10, flux_sensitivity=0.05, brightness_sensitivity=0.15,
+            source_citation="MusicGuyMixing (2023): Synth Pads hard L/R"
         )
+        self.instrument_profiles[("pads", "fx")] = self.instrument_profiles[("pads", "rhythm")]
 
-        # -- fx -- anywhere, reactive
+        # -- fx (fx) -- Reverb Ambience (InAIRSpace 2025: az 0, el 60)
         self.instrument_profiles[("fx", "fx")] = InstrumentProfile(
             category="fx", role="fx",
             base_azimuth_deg=0.0, azimuth_spread_deg=90.0,
-            base_elevation_deg=0.0, elevation_range_deg=30.0,
+            base_elevation_deg=60.0, elevation_range_deg=30.0,
+            base_distance=0.85,
+            default_spread=0.35,
+            motion_archetype="reactive",
+            energy_sensitivity=0.40, flux_sensitivity=0.60, brightness_sensitivity=0.30,
+            source_citation="InAIRSpace (2025): Hall Reverb envelopment spatial mixing"
+        )
+        
+        # -- sound_design (fx) -- Mock Data 2026: az 42, el 40
+        self.instrument_profiles[("sound_design", "fx")] = InstrumentProfile(
+            category="sound_design", role="fx",
+            base_azimuth_deg=42.0, azimuth_spread_deg=60.0,
+            base_elevation_deg=40.0, elevation_range_deg=30.0,
             base_distance=0.85,
             default_spread=0.30,
             motion_archetype="reactive",
-            energy_sensitivity=0.40,
-            flux_sensitivity=0.60,
-            brightness_sensitivity=0.30,
+            energy_sensitivity=0.45, flux_sensitivity=0.55, brightness_sensitivity=0.35,
+            source_citation="Mock source (2026): Sound Design height placement"
         )
 
         # -- fallback "other" / "unknown" -- mid-field, static
@@ -288,9 +384,8 @@ class SPFResolver:
             base_distance=0.70,
             default_spread=0.20,
             motion_archetype="static",
-            energy_sensitivity=0.10,
-            flux_sensitivity=0.10,
-            brightness_sensitivity=0.10,
+            energy_sensitivity=0.10, flux_sensitivity=0.10, brightness_sensitivity=0.10,
+            source_citation="SpatialSeed default fallback profile"
         )
 
     # ------------------------------------------------------------------
