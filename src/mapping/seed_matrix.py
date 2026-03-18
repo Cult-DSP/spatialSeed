@@ -61,16 +61,9 @@ class SeedMatrix:
         u = np.clip(u, 0.0, 1.0)
         v = np.clip(v, 0.0, 1.0)
         
-        # TODO: Implement analytic mapping
-        # Example approach:
-        # - z[0] = 0.3 + 0.7 * u  (placement spread)
-        # - z[1] = 0.2 + 0.8 * u  (height usage)
-        # - z[2] = v  (motion intensity, primarily v-driven)
-        # - z[3] = u * v  (motion complexity, interaction term)
-        # - z[4] = 1.0 - u * 0.5  (symmetry bias)
-        # - z[5] = 0.5 + u * 0.3  (front-back bias)
-        # - z[6] = u  (ensemble cohesion)
-        # - z[7] = v * 0.8  (modulation sensitivity)
+        # Analytic mapping rules:
+        # u drives spatial spread/cohesion related parameters
+        # v primarily drives motion and reactivity parameters
         
         z = np.zeros(self.Z_DIM, dtype=np.float32)
         z[0] = 0.3 + 0.7 * u  # placement spread

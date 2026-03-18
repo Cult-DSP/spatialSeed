@@ -16,6 +16,7 @@ Uses LUSID/src/scene.py dataclasses when available, falls back to dicts.
 import json
 from typing import Dict, List, Optional
 from pathlib import Path
+import jsonschema
 
 
 class LUSIDSceneWriter:
@@ -183,21 +184,27 @@ class LUSIDSceneWriter:
     # ------------------------------------------------------------------
 
     @staticmethod
-    def validate_scene(scene: Dict) -> List[str]:
+    def validate_scene(scene: Dict, schema_path: Optional[str] = None) -> List[str]:
         """
         Validate a LUSID scene dict.
 
+        If schema_path is provided, uses jsonschema to validate against
+        the official LUSID JSON schema. Otherwise, falls back to structural checks.
+
         Returns a list of error strings (empty = valid).
-        Checks:
-        - Required top-level keys
-        - Frames sorted by time
-        - Every audio_object group has a keyframe at t=0
-        - No duplicate node IDs within a single frame
-        - Bed/LFE presence at t=0
         """
         errors: List[str] = []
 
-        # Top-level keys
+        if schema_path:
+            try:
+                with open(schema_path, 'r') as f:
+                    schema = json.load(f)
+                jsonschema.validate(instance=scene, schema=schema)
+            except Exception as e:
+                errors.append(f"Schema validation failed: {str(e)}")
+                return errors
+
+        # Structural checks (even if schema validation passed, for t=0 beds etc.)
         for key in ("version", "frames"):
             if key not in scene:
                 errors.append(f"Missing top-level key '{key}'")

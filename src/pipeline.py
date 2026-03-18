@@ -7,6 +7,7 @@ Per spec: lowLevelSpecsV1.md § 7, agents.md § 8
 """
 
 import json
+import logging
 from pathlib import Path
 from typing import Optional, Tuple
 
@@ -23,6 +24,9 @@ from src.export.lusid_writer import LUSIDSceneWriter
 from src.export.lusid_package import LUSIDPackageExporter
 from src.export.adm_bw64 import ADMBw64Exporter
 
+
+from src.core.logger import setup_logging
+logger = logging.getLogger("spatialSeed.pipeline")
 
 class SpatialSeedPipeline:
     """
@@ -81,9 +85,9 @@ class SpatialSeedPipeline:
         8. LUSID Scene Assembly
         9. Exports (LUSID Package + optional ADM/BW64)
         """
-        print("=" * 60)
-        print("SpatialSeed Pipeline v0.1.0")
-        print("=" * 60)
+        logger.info("=" * 60)
+        logger.info("SpatialSeed Pipeline v0.1.0")
+        logger.info("=" * 60)
         
         # Stage 0: Session + Discovery
         session = SessionManager(str(self.project_dir), str(self.stems_dir))
@@ -112,18 +116,18 @@ class SpatialSeedPipeline:
                     if "category" in ov:
                         classifications[node_id]["category"] = ov["category"]
                         classifications[node_id]["fallbacks_used"].append("ui_override")
-                        print(f"  Override {node_id} category -> {ov['category']}")
+                        logger.info(f"  Override {node_id} category -> {ov['category']}")
                     if "role_hint" in ov:
                         classifications[node_id]["role_hint"] = ov["role_hint"]
                         if "ui_override" not in classifications[node_id]["fallbacks_used"]:
                             classifications[node_id]["fallbacks_used"].append("ui_override")
-                        print(f"  Override {node_id} role -> {ov['role_hint']}")
+                        logger.info(f"  Override {node_id} role -> {ov['role_hint']}")
         
         # Stage 4: Seed Matrix Selection
         seed_matrix = SeedMatrix()
         style_vector = seed_matrix.map_uv_to_z(u, v)
-        print(f"Stage 4: Seed Matrix Selection")
-        print(f"  (u={u:.2f}, v={v:.2f}) → z={style_vector}")
+        logger.info(f"Stage 4: Seed Matrix Selection")
+        logger.info(f"  (u={u:.2f}, v={v:.2f}) → z={style_vector}")
         
         # Save selection
         selection_path = self.work_dir / "seed_selection.json"
@@ -151,7 +155,7 @@ class SpatialSeedPipeline:
         
         # Print keyframe stats
         stats = gesture_engine.get_keyframe_stats()
-        print(f"  Keyframe stats: {stats}")
+        logger.info(f"  Keyframe stats: {stats}")
         
         # Stage 8: LUSID Scene Assembly
         lusid_writer = LUSIDSceneWriter(sample_rate=48000)
@@ -159,17 +163,23 @@ class SpatialSeedPipeline:
         scene = lusid_writer.write_scene(keyframes, str(scene_path))
         
         # Validate scene
-        scene_errors = lusid_writer.validate_scene(scene)
+        schema_path = Path(__file__).resolve().parent.parent / "LUSID" / "schema" / "lusid_scene_v0.5.schema.json"
+        
+        # pass schema path if it exists, otherwise LUSIDSceneWriter falls back to structural only
+        scene_errors = lusid_writer.validate_scene(
+            scene, 
+            schema_path=str(schema_path) if schema_path.exists() else None
+        )
         if scene_errors:
             for err in scene_errors:
-                print(f"  WARN: {err}")
+                logger.info(f"  WARN: {err}")
         else:
-            print("  LUSID scene validated OK")
+            logger.info("  LUSID scene validated OK")
         
         # Stage 9: Exports
-        print("=" * 60)
-        print("Exports")
-        print("=" * 60)
+        logger.info("=" * 60)
+        logger.info("Exports")
+        logger.info("=" * 60)
         
         # Export A: LUSID Package
         lusid_package_dir = self.export_dir / "lusid_package"
@@ -185,9 +195,9 @@ class SpatialSeedPipeline:
         pkg_errors = lusid_exporter.validate_package()
         if pkg_errors:
             for err in pkg_errors:
-                print(f"  WARN: {err}")
+                logger.info(f"  WARN: {err}")
         else:
-            print("  LUSID package validated OK")
+            logger.info("  LUSID package validated OK")
         
         # Export B: ADM/BW64 (optional)
         if export_adm:
@@ -205,16 +215,16 @@ class SpatialSeedPipeline:
             adm_errors = adm_exporter.validate_bw64(str(adm_output_path))
             if adm_errors:
                 for err in adm_errors:
-                    print(f"  WARN: {err}")
+                    logger.info(f"  WARN: {err}")
             else:
-                print("  ADM/BW64 validated OK")
+                logger.info("  ADM/BW64 validated OK")
         
-        print("=" * 60)
-        print("Pipeline complete")
-        print("=" * 60)
-        print(f"LUSID package: {lusid_package_dir}")
+        logger.info("=" * 60)
+        logger.info("Pipeline complete")
+        logger.info("=" * 60)
+        logger.info(f"LUSID package: {lusid_package_dir}")
         if export_adm:
-            print(f"ADM/BW64: {adm_output_path}")
+            logger.info(f"ADM/BW64: {adm_output_path}")
         
         # Build scene info for UI
         scene_info = {
@@ -246,6 +256,7 @@ def main():
     Command-line entry point.
     """
     import argparse
+    setup_logging()
     
     parser = argparse.ArgumentParser(description="SpatialSeed: Immersive Spatial Scene Authoring")
     parser.add_argument("stems_dir", help="Directory containing input stems")
@@ -280,7 +291,7 @@ def main():
     with open(results_path, 'w') as f:
         json.dump(results, f, indent=2)
     
-    print(f"\nResults saved to {results_path}")
+    logger.info(f"\nResults saved to {results_path}")
 
 
 if __name__ == "__main__":
