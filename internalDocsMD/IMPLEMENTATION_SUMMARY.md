@@ -196,22 +196,20 @@ spatialSeed/
 
 - Full module structure with `src.*` package imports
 - Virtual environment setup (`init.sh` / `activate.sh`)
-- **Stage 0 -- session.py:** stem discovery, SHA-256 hashing, validation, deterministic ID allocation, manifest JSON
-- **Stage 1 -- audio_io.py:** librosa resampling to 48 kHz, stereo splitting, silent bed/LFE WAV generation, soundfile I/O
-- **Stage 2 -- mir/extract.py:** librosa-based feature extraction (RMS, centroid, flux, onset density, pitch confidence, HPSS harmonic ratio, spectral flatness, ZCR), hash-based caching, stereo mix features, MIR heuristic helpers
-- **Stage 3 -- mir/classify.py:** filename-regex fallbacks (extended with LV/BV/Aco/string patterns), MIR heuristic fallbacks (tuned against real stems), lazy Essentia TF model loading, canonical category + role mapping with threshold/margin logic, caching
-- **Stage 4 -- seed_matrix.py:** analytic (u,v) to z mapping (pure NumPy, complete)
-- **Stage 5 -- spf.py:** InstrumentProfile dataclass (10 profiles), spherical-to-Cartesian conversion, stereo-pair-aware style profile resolution, front_back_bias/height_usage modulation, clamp_to_cube
-- **Stage 6 -- placement.py:** static XYZ placement using SPF base positions, front_back_bias/height_usage scaling, cube clamping
-- **Stage 7 -- gesture_engine.py:** 4 motion generators (static, gentle_drift with sinusoidal offsets, orbit with elliptical paths, reactive with MIR-driven jitter), emission threshold filtering, deterministic RNG per node
-- **Stage 8 -- lusid_writer.py:** LUSID Scene v0.5 assembly with delta frames, bed/direct-speaker + LFE injection at t=0, schema-compliant node dicts (no channelName), full validation (sorted frames, t=0 coverage, duplicate IDs)
-- **Stage 9A -- export/lusid_package.py:** flat package folder with scene.lusid.json, containsAudio.json (real RMS from WAVs via soundfile), mir_summary.json, all WAV files. ADM channel order (beds first, then objects). Package validation.
-- **UI -- ui/app.py:** Streamlit interface with Seed Matrix (u,v) sliders, stem discovery, per-node category/role override selectboxes, pipeline execution with stdout capture, results display (keyframe stats, style vector, classification table, export paths), pipeline log viewer
-- **pipeline.py:** classification_overrides parameter for UI-driven category/role injection, enriched return dict with classifications and scene_info for UI consumption
-- Configuration templates, direct speaker template, README, agents.md
-- **tests/test_stages_0_3.py:** end-to-end smoke test using real stems
-- **tests/test_stages_0_7.py:** full pipeline smoke test, stages 0-7
-- **tests/test_stages_0_9.py:** full pipeline + LUSID output test, stages 0-9A
+- Config-driven architecture routing `config/defaults.json` through all stages
+- Validation of mono stem inputs edge cases
+- Renamed all instances of "sonoPleth" to "Spatial Root"
+- **Stage 0 -- session.py:** stem discovery, validation, deterministic ID allocation
+- **Stage 1 -- audio_io.py:** librosa resampling, mono + stereo handling
+- **Stage 2 -- mir/extract.py:** librosa-based feature extraction
+- **Stage 3 -- mir/classify.py:** heuristics and ML categorization
+- **Stage 4 -- seed_matrix.py:** analytic (u,v) to z mapping
+- **Stage 5 -- spf.py:** InstrumentProfile resolution
+- **Stage 6 -- placement.py:** static XYZ placement
+- **Stage 7 -- gesture_engine.py:** keyframe animation and bounds
+- **Stage 8 -- lusid_writer.py:** LUSID Scene API encoding
+- **Stage 9A -- export/lusid_package.py:** folder export logic
+- **UI -- ui/app.py:** Streamlit interface with 2D Altair Canvas for Seed Matrix
 
 ### [VALIDATED] Test Results (2026-02-11)
 
@@ -243,7 +241,7 @@ Classification accuracy (both filename and MIR-only paths produce correct result
 
 ### [DEFERRED] ADM Export
 
-- **Stage 9B -- export/adm_bw64.py:** Code written (LUSID-to-ADM XML generation, WAV interleaving, sidecar XML) but not tested end-to-end. Deferred per user -- not needed for v1.
+- **Stage 9B -- export/adm_bw64.py:** Code written but needs update for cult_transcoder.
 
 ### [TODO] Remaining
 

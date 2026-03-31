@@ -22,6 +22,8 @@ from pathlib import Path
 from typing import Dict, List, Optional
 
 import streamlit as st
+import pandas as pd
+import altair as alt
 
 # ---------------------------------------------------------------------------
 # Ensure src/ is importable regardless of how streamlit launches
@@ -146,6 +148,20 @@ def _render_sidebar():
         )
 
         st.code(f"(u={u:.2f}, v={v:.2f})", language=None)
+
+        # 2D Canvas Visualization
+        df = pd.DataFrame({"u": [u], "v": [v], "label": ["Current Selection"]})
+        chart = alt.Chart(df).mark_circle(size=200, color="#FF4B4B").encode(
+            x=alt.X("u:Q", scale=alt.Scale(domain=[0, 1]), title="u - Aesthetic Variation"),
+            y=alt.Y("v:Q", scale=alt.Scale(domain=[0, 1]), title="v - Dynamic Immersion"),
+            tooltip=["u", "v"]
+        ).properties(
+            height=250
+        ).configure_axis(
+            grid=True,
+            gridDash=[2,2]
+        )
+        st.altair_chart(chart, use_container_width=True)
 
         st.divider()
         st.caption("SpatialSeed v0.1.0")

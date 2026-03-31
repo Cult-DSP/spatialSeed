@@ -14,7 +14,7 @@
 - Coordinate convention: **+X = right, +Y = front, +Z = up**.
 - Stereo stems → **two object groups** (split to mono WAVs).
 - Export priorities:
-  1. **LUSID Package** for sonoPleth quick render
+  1. **LUSID Package** for Spatial Root quick render
   2. **ADM/BW64** for Logic import (beds first, then objects; always include beds)
 - LFE: special file **`LFE.wav`** (always present; silent in v1).
 - Audio format: **48 kHz**, mono, **float32** (v1).  
@@ -239,7 +239,7 @@ Example excerpt:
 
 ## 8. SonoPleth integration note
 
-Add a sonoPleth entrypoint:
+Add a Spatial Root entrypoint:
 
 - `renderFromLUSID` that accepts a **LUSID package folder** and renders directly.
 

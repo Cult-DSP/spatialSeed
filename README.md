@@ -10,7 +10,7 @@ SpatialSeed is a **LUSID-first** spatial audio authoring pipeline that:
 - Analyzes audio with MIR (Music Information Retrieval)
 - Classifies instruments and assigns spatial roles
 - Generates spatial placements and motion via the **Seed Matrix** interface
-- Outputs **LUSID packages** for immediate rendering in sonoPleth
+- Outputs **LUSID packages** for immediate rendering in Spatial Root
 - Optionally exports **ADM/BW64** for DAW import (Logic Pro Atmos)
 
 ## Quick Start
@@ -83,7 +83,7 @@ A folder containing:
 - `mir_summary.json` - MIR feature summaries
 - Mono WAVs: `1.1.wav`, `2.1.wav`, ..., `LFE.wav`, `11.1.wav`, ...
 
-**Drop-in compatible** with sonoPleth renderer.
+**Drop-in compatible** with Spatial Root renderer.
 
 ### ADM/BW64 Export (Optional)
 

@@ -12,7 +12,7 @@ SpatialSeed is an offline authoring tool that generates **immersive spatial scen
 - a stereo reference mix
 - isolated stems
 
-Its primary output is a **LUSID scene + audio package** suitable for rapid spatial rendering in sonoPleth, plus an optional **ADM/BW64 export** for DAWs (Logic Atmos import).
+Its primary output is a **LUSID scene + audio package** suitable for rapid spatial rendering in Spatial Root, plus an optional **ADM/BW64 export** for DAWs (Logic Atmos import).
 
 ---
 
@@ -51,7 +51,7 @@ A folder containing:
 - `containsAudio.json` (silence flags; beds are silent in v1)
 - `mir_summary.json` (v1: external MIR summaries; future: LUSID spectral_features)
 
-This package is intended to be **drop-in renderable** by sonoPleth (planned helper: `renderFromLUSID`).
+This package is intended to be **drop-in renderable** by Spatial Root (planned helper: `renderFromLUSID`).
 
 ### 3.2 Output B — ADM/BW64 export (secondary)
 
@@ -144,4 +144,4 @@ Implementation can start lightweight and local-only.
 - Integrate MIR into LUSID spectral_features nodes.
 - Expand direct speaker mappings for non-Atmos bed sets and other environments.
 - Introduce explicit LFE/sub bus routing and multi-sub support (deferred).
-- Add `renderFromLUSID` interface inside sonoPleth to load and render the LUSID package directly.
+- Add `renderFromLUSID` interface inside Spatial Root to load and render the LUSID package directly.

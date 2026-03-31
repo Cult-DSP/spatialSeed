@@ -36,13 +36,19 @@ class AudioNormalizer:
     TARGET_SAMPLE_RATE = 48000
     SAMPLE_FORMAT = np.float32  # v1: float32
 
-    def __init__(self, cache_dir: Optional[str] = None):
+    def __init__(self, cache_dir: Optional[str] = None, sample_rate: int = 48000, sample_format: str = "float32"):
         """
         Initialize audio normalizer.
 
         Args:
             cache_dir: Optional directory for caching processed audio
+            sample_rate: Target sample rate for the project
+            sample_format: Target audio format (e.g. "float32")
         """
+        self.target_sample_rate = sample_rate
+        self.sample_format_str = sample_format.lower()
+        self.sample_format = np.float32 if self.sample_format_str == "float32" else np.float32
+
         self.cache_dir = Path(cache_dir) if cache_dir else None
         if self.cache_dir:
             self.cache_dir.mkdir(parents=True, exist_ok=True)
@@ -66,11 +72,11 @@ class AudioNormalizer:
         Per spec (agents.md 2.1):
         - Resample only, NO gain changes
         """
-        if original_sr == self.TARGET_SAMPLE_RATE:
-            return audio.astype(self.SAMPLE_FORMAT)
+        if original_sr == self.target_sample_rate:
+            return audio.astype(self.sample_format)
 
         logger.info(
-            "Resampling from %d Hz to %d Hz", original_sr, self.TARGET_SAMPLE_RATE
+            "Resampling from %d Hz to %d Hz", original_sr, self.target_sample_rate
         )
 
         if audio.ndim == 1:
@@ -78,7 +84,7 @@ class AudioNormalizer:
             resampled = librosa.resample(
                 audio.astype(np.float32),
                 orig_sr=original_sr,
-                target_sr=self.TARGET_SAMPLE_RATE,
+                target_sr=self.target_sample_rate,
             )
         elif audio.ndim == 2:
             # Multi-channel: resample each channel independently
@@ -88,14 +94,14 @@ class AudioNormalizer:
                     librosa.resample(
                         audio[ch].astype(np.float32),
                         orig_sr=original_sr,
-                        target_sr=self.TARGET_SAMPLE_RATE,
+                        target_sr=self.target_sample_rate,
                     )
                 )
             resampled = np.stack(channels, axis=0)
         else:
             raise ValueError(f"Unsupported audio shape: {audio.shape}")
 
-        return resampled.astype(self.SAMPLE_FORMAT)
+        return resampled.astype(self.sample_format)
 
     # ------------------------------------------------------------------
     # Stereo splitting
@@ -122,8 +128,8 @@ class AudioNormalizer:
                 f"Expected stereo audio shape (2, samples), "
                 f"got {stereo_audio.shape}"
             )
-        left = stereo_audio[0].astype(self.SAMPLE_FORMAT)
-        right = stereo_audio[1].astype(self.SAMPLE_FORMAT)
+        left = stereo_audio[0].astype(self.sample_format)
+        right = stereo_audio[1].astype(self.sample_format)
         return left, right
 
     # ------------------------------------------------------------------
@@ -144,8 +150,8 @@ class AudioNormalizer:
             )
         sf.write(
             output_path,
-            audio.astype(self.SAMPLE_FORMAT),
-            self.TARGET_SAMPLE_RATE,
+            audio.astype(self.sample_format),
+            self.target_sample_rate,
             subtype="FLOAT",
         )
         logger.info("Wrote mono WAV: %s  (%d samples)", output_path, len(audio))
@@ -162,9 +168,9 @@ class AudioNormalizer:
         - Bed WAVs (1.1 through 10.1) are silent in v1
         - LFE.wav is silent in v1
         """
-        num_samples = int(duration_seconds * self.TARGET_SAMPLE_RATE)
-        silent_audio = np.zeros(num_samples, dtype=self.SAMPLE_FORMAT)
-        sf.write(output_path, silent_audio, self.TARGET_SAMPLE_RATE, subtype="FLOAT")
+        num_samples = int(duration_seconds * self.target_sample_rate)
+        silent_audio = np.zeros(num_samples, dtype=self.sample_format)
+        sf.write(output_path, silent_audio, self.target_sample_rate, subtype="FLOAT")
         logger.info("Wrote silent WAV: %s  (%.2fs)", output_path, duration_seconds)
 
     def create_all_bed_wavs(self, duration_seconds: float, output_dir: str) -> None:
@@ -295,7 +301,7 @@ class AudioNormalizer:
         # Create silent bed WAVs matching the longest stem
         self.create_all_bed_wavs(max_duration, output_dir)
 
-        print(f"  All audio normalized to {self.TARGET_SAMPLE_RATE} Hz")
+        print(f"  All audio normalized to {self.target_sample_rate} Hz")
 
 
 # ======================================================================

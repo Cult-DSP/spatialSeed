@@ -40,13 +40,16 @@ class GestureEngine:
     - Ensure t=0.0 keyframe for each source.
     """
 
-    # Keyframe emission thresholds (per agents.md 13)
-    POS_EPSILON = 0.01       # Position change threshold (normalised units)
-    SPREAD_EPSILON = 0.02    # Spread change threshold
-
-    def __init__(self, duration_seconds: float):
+    def __init__(self, duration_seconds: float, config: Optional[dict] = None):
         self.duration = duration_seconds
         self.keyframes: Dict[str, List[Keyframe]] = {}
+
+        # Configs
+        config_gesture = config.get("gesture", {}) if config else {}
+        self.POS_EPSILON = config_gesture.get("position_epsilon", 0.01)
+        self.SPREAD_EPSILON = config_gesture.get("spread_epsilon", 0.02)
+        self.default_orbit_radius = config_gesture.get("default_orbit_radius", 0.3)
+        self.default_orbit_period = config_gesture.get("default_orbit_period", 8.0)
 
     # ------------------------------------------------------------------
     # Motion generators

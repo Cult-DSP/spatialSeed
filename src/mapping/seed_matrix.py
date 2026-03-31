@@ -25,12 +25,18 @@ class SeedMatrix:
     - Output: style vector z for use across all instruments
     """
     
-    # Style vector dimension (v1: small, expandable)
-    Z_DIM = 8
-    
-    def __init__(self):
-        """Initialize Seed Matrix mapper."""
-        pass
+    def __init__(self, z_dim: int = 8, default_u: float = 0.5, default_v: float = 0.3):
+        """
+        Initialize Seed Matrix mapper.
+        
+        Args:
+            z_dim: Dimension of style vector
+            default_u: Default u parameter
+            default_v: Default v parameter
+        """
+        self.Z_DIM = z_dim
+        self.default_u = default_u
+        self.default_v = default_v
     
     def map_uv_to_z(self, u: float, v: float) -> np.ndarray:
         """
@@ -83,10 +89,8 @@ class SeedMatrix:
         
         Returns:
             Default (u, v) tuple
-            
-        Default: moderate aesthetic, low-moderate animation
         """
-        return (0.5, 0.3)
+        return (self.default_u, self.default_v)
     
     def describe_z(self, z: np.ndarray) -> dict:
         """

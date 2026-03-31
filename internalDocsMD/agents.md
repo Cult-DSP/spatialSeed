@@ -1,5 +1,29 @@
 # AGENTS.md — SpatialSeed (LUSID-first) — Project Agent Instructions
 
+> **🚨 ONBOARDING PROMPT FOR THE NEXT AGENT 🚨**
+>
+> **Welcome!** If you are reading this, you are picking up from the previous agent's session.
+>
+> **Task Context & Progress:**
+> The user provided a 5-step priority list. Here is where we stand:
+>
+> 1. **[DONE]** Config-Driven Architecture. `src/pipeline.py` and module initializations have been refactored to read from `config/defaults.json`.
+> 2. **[DONE]** Test edge case with Mono stems. We created a mono test file (`00_mono_vox.wav`) and validated that the pipeline completely and securely processes mono inputs alongside stereo.
+> 3. **[DONE]** Rename all instances of "sonoPleth" to "Spatial Root" across the project docs and code.
+> 4. **[IN PROGRESS]** UI polish of the Seed Matrix. We have just injected a 2D interactive canvas visualization using `pandas` and `altair` into `ui/app.py`.
+> 5. **[PENDING]** Investigate and add proper ADM export to the `cult_transcoder` submodule from the LUSID package.
+>
+> **Immediate Next Steps for You:**
+>
+> 1. Activate the environment: `source activate.sh` (**NO `pip install` commands allowed!**).
+> 2. Test the Streamlit UI: Run `PYTHONPATH=. streamlit run ui/app.py` to ensure the Altair 2D Seed Matrix canvas renders correctly and is polished enough for the user. Fix any layout/type issues if they arise.
+> 3. Tackle Task 5 (ADM Export): The user specifically requested, "look at adding proper adm export to cult transcoder from lusid package."
+>    - Context: `cult_transcoder` is currently a C++ CLI that converts `adm_xml` -> `lusid_json`.
+>    - `src/export/adm_bw64.py` currently holds Python logic for ADM export.
+>    - You need to determine if we should add the reverse transcoding (`lusid_json` -> `adm_xml`) into the C++ `cult_transcoder` repo, or if the python logic needs to be hooked up. Check `cult_transcoder/internalDocsMD/DEV-PLAN-CULT.md`.
+>
+> Good luck!
+
 **Date:** 2026-02-11 (Updated)
 **Applies to:** `spatialSeed/` (Python prototype), integrated with the `LUSID/` submodule  
 **Source of truth:**
@@ -16,7 +40,7 @@
 This file tells coding agents how to work inside the SpatialSeed project without breaking:
 
 - LUSID compatibility
-- sonoPleth rendering assumptions
+- Spatial Root rendering assumptions
 - ADM packaging + Logic import goals
 - deterministic ID/file naming contracts
 
@@ -60,7 +84,7 @@ repo root so that `from src.* import ...` resolves correctly.
 - [DONE] Expand SPF profile coverage -- extended spf.py profiles to include backing vocals, percussion, lead keys, lead strings, brass, woodwinds, choir, and sound design.
 - [DONE] LUSID schema validation -- lusid_writer.py validates against LUSID/schema/lusid_scene_v0.5.schema.json using jsonschema.
 - [DONE] MIR extraction speedup -- Optimized librosa STFT reuse, switched audio loading to soundfile, and wrapped the loop in ProcessPoolExecutor for concurrent batching.
-- [TODO] sonoPleth renderer smoke test -- Section 10 requires loading LUSID package into sonoPleth to verify object positions, delta frames, LFE recognition. Never tested.
+- [TODO] Spatial Root renderer smoke test -- Section 10 requires loading LUSID package into Spatial Root to verify object positions, delta frames, LFE recognition. Never tested.
 - [DONE] Unit tests per module -- Only `seed_matrix` and `spf` tests are written but using python's built-in `unittest`. Moved writing remainder of unit tests to the end of the roadmap.
 - [TODO] Config-driven pipeline -- config/defaults.json exists but pipeline.py uses hardcoded values. Wire config through (gesture thresholds, z_dim, etc.).
 - [TODO] Edge case: mono stems -- session.py supports mono (1 group) but no test coverage. Verify full pipeline with mono input.
@@ -73,7 +97,7 @@ repo root so that `from src.* import ...` resolves correctly.
 
 SpatialSeed is an offline authoring pipeline that takes a stereo reference mix + isolated stems and generates:
 
-1. a **LUSID package** (folder) containing `scene.lusid.json` + mono WAVs + metadata, for immediate spatial rendering in sonoPleth, and
+1. a **LUSID package** (folder) containing `scene.lusid.json` + mono WAVs + metadata, for immediate spatial rendering in Spatial Root, and
 2. an optional **ADM/BW64 export** for DAWs (Logic Atmos import).
 
 SpatialSeed is **LUSID-first**: LUSID JSON is the canonical scene representation; ADM XML metadata is produced by LUSID’s transcoders, while SpatialSeed owns the **audio container packaging** step.
@@ -320,7 +344,7 @@ SpatialSeed uses the provided direct-speaker template (pluggable later for other
 
 ## 9) Implementation boundaries and “don’t break” rules
 
-### 9.1 Do not break sonoPleth renderer assumptions
+### 9.1 Do not break Spatial Root renderer assumptions
 
 - LFE is loaded by the key `"LFE"` and the file name `LFE.wav`.
 - `direct_speaker` and `audio_object` nodes require `cart`.
@@ -359,7 +383,7 @@ SpatialSeed uses the provided direct-speaker template (pluggable later for other
 
 ### Renderer compatibility smoke test
 
-- Load the package into sonoPleth using the current LUSID loader and ensure:
+- Load the package into Spatial Root using the current LUSID loader and ensure:
   - objects appear in expected positions
   - no crashes on delta frames
   - LFE is recognized (even if silent)
@@ -389,7 +413,7 @@ Agents should implement structured logging for:
 
 ## 12) Roadmap notes (keep these TODOs explicit)
 
-- Add a sonoPleth utility `renderFromLUSID` that accepts a **LUSID package folder** and renders it directly.
+- Add a Spatial Root utility `renderFromLUSID` that accepts a **LUSID package folder** and renders it directly.
 - Consider periodic full-frame refresh if delta frames cause issues.
 - Consider moving BW64/ADM packaging to C++ later.
 - Integrate MIR into LUSID `spectral_features` nodes later (v2).

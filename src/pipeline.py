@@ -94,7 +94,9 @@ class SpatialSeedPipeline:
         manifest = session.run()
         
         # Stage 1: Normalize + Split Audio
-        audio_normalizer = AudioNormalizer(cache_dir=str(self.cache_dir / "audio"))
+        sample_rate = self.config.get("sample_rate", 48000)
+        audio_format = self.config.get("audio_format", "float32")
+        audio_normalizer = AudioNormalizer(cache_dir=str(self.cache_dir / "audio"), sample_rate=sample_rate, sample_format=audio_format)
         wav_dir = self.work_dir / "wavs"
         wav_dir.mkdir(exist_ok=True)
         audio_normalizer.process_all_stems(manifest, str(wav_dir))
@@ -124,7 +126,11 @@ class SpatialSeedPipeline:
                         logger.info(f"  Override {node_id} role -> {ov['role_hint']}")
         
         # Stage 4: Seed Matrix Selection
-        seed_matrix = SeedMatrix()
+        sm_config = self.config.get("seed_matrix", {})
+        z_dim = sm_config.get("z_dim", 8)
+        default_u = sm_config.get("default_u", 0.5)
+        default_v = sm_config.get("default_v", 0.3)
+        seed_matrix = SeedMatrix(z_dim=z_dim, default_u=default_u, default_v=default_v)
         style_vector = seed_matrix.map_uv_to_z(u, v)
         logger.info(f"Stage 4: Seed Matrix Selection")
         logger.info(f"  (u={u:.2f}, v={v:.2f}) → z={style_vector}")
@@ -150,7 +156,7 @@ class SpatialSeedPipeline:
         
         # Stage 7: Gesture Generation
         duration = manifest.get("max_duration_seconds", 300.0)
-        gesture_engine = GestureEngine(duration_seconds=duration)
+        gesture_engine = GestureEngine(duration_seconds=duration, config=self.config)
         keyframes = gesture_engine.generate_all_gestures(placements, profiles, mir_summary)
         
         # Print keyframe stats
@@ -158,7 +164,8 @@ class SpatialSeedPipeline:
         logger.info(f"  Keyframe stats: {stats}")
         
         # Stage 8: LUSID Scene Assembly
-        lusid_writer = LUSIDSceneWriter(sample_rate=48000)
+        sample_rate = self.config.get("sample_rate", 48000)
+        lusid_writer = LUSIDSceneWriter(sample_rate=sample_rate)
         scene_path = self.work_dir / "scene.lusid.json"
         scene = lusid_writer.write_scene(keyframes, str(scene_path))
         
@@ -183,7 +190,7 @@ class SpatialSeedPipeline:
         
         # Export A: LUSID Package
         lusid_package_dir = self.export_dir / "lusid_package"
-        lusid_exporter = LUSIDPackageExporter(str(lusid_package_dir))
+        lusid_exporter = LUSIDPackageExporter(str(lusid_package_dir), config=self.config)
         lusid_exporter.create_package(
             scene_path=str(scene_path),
             mir_summary_path=str(mir_summary_path),
