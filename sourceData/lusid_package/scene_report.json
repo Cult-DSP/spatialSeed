@@ -1,0 +1,30 @@
+{
+  "reportVersion": "0.1",
+  "tool": {
+    "name": "cult-transcoder",
+    "version": "0.1.0",
+    "gitCommit": "a31d55c"
+  },
+  "args": {
+    "in": "/Users/lucian/projects/spatialroot/sourceData/lusid_package/scene.lusid.json",
+    "inFormat": "lusid_json",
+    "out": "/Users/lucian/projects/spatialroot/sourceData/lusid_package/scene.lusid.json",
+    "outFormat": "lusid_json",
+    "report": "/Users/lucian/projects/spatialroot/sourceData/lusid_package/scene_report.json",
+    "stdoutReport": false,
+    "lfeMode": "hardcoded"
+  },
+  "status": "fail",
+  "errors": [
+    "Unsupported --in-format: 'lusid_json'. Supported: adm_xml"
+  ],
+  "warnings": [],
+  "summary": {
+    "durationSec": 0,
+    "sampleRate": 0,
+    "timeUnit": "seconds",
+    "numFrames": 0,
+    "countsByNodeType": {}
+  },
+  "lossLedger": []
+}
