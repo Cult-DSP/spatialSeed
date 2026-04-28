@@ -20,7 +20,7 @@
 > 3. Tackle Task 5 (ADM Export): The user specifically requested, "look at adding proper adm export to cult transcoder from lusid package."
 >    - Context: `cult_transcoder` is currently a C++ CLI that converts `adm_xml` -> `lusid_json`.
 >    - `src/export/adm_bw64.py` currently holds Python logic for ADM export.
->    - You need to determine if we should add the reverse transcoding (`lusid_json` -> `adm_xml`) into the C++ `cult_transcoder` repo, or if the python logic needs to be hooked up. Check `cult_transcoder/internalDocsMD/DEV-PLAN-CULT.md`.
+>    - You need to determine if we should add the reverse transcoding (`lusid_json` -> `adm_xml`) into the C++ `cult_transcoder` repo, or if the python logic needs to be hooked up. Check `cult_transcoder/internalDocs/DEV-PLAN-CULT.md`.
 >
 > Good luck!
 
@@ -28,10 +28,10 @@
 **Applies to:** `spatialSeed/` (Python prototype), integrated with the `LUSID/` submodule  
 **Source of truth:**
 
-- `internalDocsMD/DesignSpecV1.md` (high-level design)
-- `internalDocsMD/lowLevelSpecsV1.md` (low-level architecture)
-- `internalDocsMD/classify_README.md` (classification spec)
-- **`internalDocsMD/IMPLEMENTATION_SUMMARY.md`** (current implementation status)
+- `internalDocs/DesignSpecV1.md` (high-level design)
+- `internalDocs/lowLevelSpecsV1.md` (low-level architecture)
+- `internalDocs/classify_README.md` (classification spec)
+- **`internalDocs/IMPLEMENTATION_SUMMARY.md`** (current implementation status)
 
 ---
 
@@ -49,7 +49,7 @@ This file tells coding agents how to work inside the SpatialSeed project without
 If you are continuing implementation work on this project:
 
 1. **SET UP ENV:** Run `./init.sh` (one-time), then `source activate.sh` (each session).
-2. **READ FIRST:** `internalDocsMD/IMPLEMENTATION_SUMMARY.md` - shows what is built and what needs implementation.
+2. **READ FIRST:** `internalDocs/IMPLEMENTATION_SUMMARY.md` - shows what is built and what needs implementation.
 3. **THEN READ:** This file for contracts and non-negotiables.
 4. **CHECK:** Section 2 (Non-negotiables), Section 4 (Output contracts), Section 14 (Implementation roadmap).
 
@@ -529,7 +529,7 @@ These are optional plug-in backends. Keep the default Essentia models for the re
 
 **Current status:** Phases 1-4 and 6 complete and tested with real stems. Phase 5 (ADM export) deferred.
 
-See `internalDocsMD/IMPLEMENTATION_SUMMARY.md` for:
+See `internalDocs/IMPLEMENTATION_SUMMARY.md` for:
 
 - Detailed module-by-module status
 - Implementation priorities
@@ -718,7 +718,7 @@ def compute_rms_db(audio: np.ndarray) -> float:
 
 **Key files to read:**
 
-1. `internalDocsMD/IMPLEMENTATION_SUMMARY.md` - What's built, what needs work
+1. `internalDocs/IMPLEMENTATION_SUMMARY.md` - What's built, what needs work
 2. `README.md` - Project overview and quick start
 3. `src/pipeline.py` - See the full pipeline flow
 4. `config/defaults.json` - Configuration parameters

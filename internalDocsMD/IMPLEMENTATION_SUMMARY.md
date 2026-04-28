@@ -27,7 +27,7 @@ source activate.sh # each session: activates venv + sets PYTHONPATH
 
 ## What Was Created
 
-A complete repository structure for SpatialSeed with detailed pseudocode and comments based on the specifications in `internalDocsMD/`.
+A complete repository structure for SpatialSeed with detailed pseudocode and comments based on the specifications in `internalDocs/`.
 
 ### Directory Structure
 
@@ -59,7 +59,7 @@ spatialSeed/
 │   └── directSpeakerData.json    # Bed/direct-speaker template
 ├── cache/                        # (Created dynamically)
 ├── tests/                        # (Empty, ready for tests)
-├── internalDocsMD/               # Design specifications (existing)
+├── internalDocs/               # Design specifications (existing)
 │   ├── DesignSpecV1.md
 │   ├── lowLevelSpecsV1.md
 │   ├── agents.md
@@ -310,7 +310,7 @@ The core pipeline (Phases 1-4, 6) is complete. Remaining work:
 
 ## Resources
 
-- Specs: `internalDocsMD/*.md`
+- Specs: `internalDocs/*.md`
 - Implementation Roadmap: `agents.md` Section 14
 - LUSID: `LUSID/README.md`, `LUSID/internalDocs/*.md`
 - Essentia: https://essentia.upf.edu/

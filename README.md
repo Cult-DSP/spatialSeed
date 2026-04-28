@@ -117,7 +117,7 @@ spatialSeed/
 │   └── defaults.json         # Default configuration
 ├── templates/
 │   └── directSpeakerData.json # Bed/direct-speaker template
-├── internalDocsMD/           # Design specifications
+├── internalDocs/           # Design specifications
 │   ├── DesignSpecV1.md
 │   ├── lowLevelSpecsV1.md
 │   ├── agents.md
@@ -161,10 +161,10 @@ Current status:
 
 ## Documentation
 
-- `internalDocsMD/DesignSpecV1.md` - High-level design specification
-- `internalDocsMD/lowLevelSpecsV1.md` - Low-level architecture
-- `internalDocsMD/agents.md` - Agent instructions and contracts
-- `internalDocsMD/classify_README.md` - Classification module spec
+- `internalDocs/DesignSpecV1.md` - High-level design specification
+- `internalDocs/lowLevelSpecsV1.md` - Low-level architecture
+- `internalDocs/agents.md` - Agent instructions and contracts
+- `internalDocs/classify_README.md` - Classification module spec
 
 ## Dependencies
 
@@ -192,7 +192,7 @@ TODO: Add license
 
 ## Contributing
 
-See `internalDocsMD/agents.md` for development guidelines and non-negotiable contracts.
+See `internalDocs/agents.md` for development guidelines and non-negotiable contracts.
 
 ## Contact
 
