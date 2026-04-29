@@ -1010,13 +1010,70 @@ def compute_rms_db(audio: np.ndarray) -> float:
 - Remaining: ADM export testing, unit test expansion, UI polish (2D canvas, per-stage progress)
 - Remaining: ADM export testing, unit test expansion, UI polish (2D canvas, per-stage progress)
 
-### 2026-04-29 -- Phase 7 MIR Deepening complete
+### 2026-04-29 -- Phase 7 MIR Deepening complete + SPF Data Sheets Integration + Upmixing Engine Roadmap
 
-**What was done:**
+**Phase 7 - MIR Deepening (DONE):**
 
 - Expanded `src/mir/extract.py` with advanced `librosa` features: `tempo_bpm`, `mfcc_mean`, `spectral_contrast_mean`, `tonnetz_mean`, and backtrack onset tracking.
 - Updated `src/mir/classify.py` to utilize these deeper features for fallback classification heuristics (better bass detection via spectral contrast, better percussion detection).
 - Optimized feature extraction by reusing STFT harmonics for Chroma/Tonnetz evaluations.
 - Created `internalDocs/MIR.md` to formally document the pipeline architecture, extraction capabilities, classification strategy, and downstream consumption goals.
 
-**Next:** Wire the new `tempo_bpm` and advanced features into `src/gesture_engine.py` for tempo-synced spatial orbits.
+**SPF Data Sheets Integration (DONE - 2026-04-29):**
+
+- Implemented `load_spf_data_sheets()` and `create_sheet_based_profile()` loaders in `src/spatial/spf.py`
+- Added 16 data-sheet stereo drum variants (hi-hat L/R, floor tom L/R, cymbals) with source citations
+- Added 20 AI-hallucinated ambient/texture/field profiles (6 ambient pads, 4 granular, 6 sound design, 6 field recordings)
+- Total profile inventory expanded: 30 → 104 (+347%)
+- Created comprehensive reference: `SPF_TEXTURE_PROFILES_REFERENCE.md`
+
+**Upmixing Engine Roadmap (IN PROGRESS - 2026-04-29):**
+
+**Phase 8.1 — PRIORITY 1 & 2 (v2.2 - Immediate):**
+
+**Priority 1 - Context-aware profile selection:**
+
+- [ ] Add metadata parameter to `SPFResolver.resolve_style_profile()`: genre, overall_energy, instrumentation_density
+- [ ] Implement profile modulation based on:
+  - Jazz/orchestral → slower, more cohesive motion
+  - Electronic/hip-hop → more reactive, higher modulation
+  - Sparse/dense → adjust spread and motion intensity
+
+**Priority 2 - Frequency-elevation coupling:**
+
+- [ ] Tie spectral_centroid MIR feature to elevation constraints:
+  - Low freq (kick, bass): -8° to 0°
+  - Mid freq (vocals, drums): 0° to 25°
+  - High freq (pads, ambient): 40° to 90°
+- [ ] Add frequency-based elevation clipping in `resolve_style_profile()`
+
+**Phase 8.2 — PRIORITY 5 (v2.2 - Post 1&2):**
+
+**Priority 5 - MIR tier 2 modulation (energy/flux/brightness → spread/motion intensity):**
+
+- [ ] Wire MIR features into spread calculation:
+  - High energy → tighter spread (focus)
+  - High flux → wider spread (active, diffuse)
+  - High brightness → increased motion_intensity
+- [ ] Extend `resolve_all_profiles()` with MIR-driven modulation
+
+**Phase 8.3 — PRIORITY 3 & 4 (v3.1+ - Future Work):**
+
+**Priority 3 - Gesture parametric motion (deferred to v3.0):**
+
+- [ ] Tempo-synced orbital motion (see `SPF_GESTURE_V3_ROADMAP.md` Part 2)
+- [ ] Onset-driven reactive bursts
+- [ ] Context-aware gesture selection
+
+**Priority 4 - Per-stem UI tuning (deferred to v3.2+):**
+
+- [ ] Interactive per-stem profile override UI
+- [ ] Visual motion preview (2D/3D scatter)
+- [ ] Real-time A/B comparison
+
+**Status:** Priority 1 & 2 ready for implementation; Priority 5 queued; Priority 3 & 4 documented in future work.
+
+**References:**
+
+- Upmixing improvements roadmap: See top of `src/spatial/spf.py` for detailed priority breakdown
+- Gesture engine future: `SPF_GESTURE_V3_ROADMAP.md` (Part 2: Enhanced MIR Integration, Part 3: Parametric Motion Classes)

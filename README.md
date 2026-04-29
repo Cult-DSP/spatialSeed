@@ -32,17 +32,41 @@ source activate.sh
 
 ### Basic Usage
 
+#### Command Line
+
 ```bash
-# Make sure the venv is active
+# Activate the virtual environment
 source activate.sh
 
-# Run pipeline from command line
-python src/pipeline.py /path/to/stems --project-dir ./my_project -u 0.5 -v 0.3
-source src/pipeline.py /Users/lucian/Desktop/ATMOS-projects/Riparian-Atmos/swale-solo-stems --project-dir /Users/lucian/Desktop/tmp -u 0.5 -v 0.3
+# Run pipeline with default parameters (u=0.5, v=0.3)
+python -m src.pipeline /path/to/stems --project-dir ./my_project
 
-# Or use the Streamlit UI
+# Run with custom Seed Matrix parameters
+python -m src.pipeline /path/to/stems --project-dir ./my_project -u 0.5 -v 0.3
+
+# Export ADM/BW64 in addition to LUSID package
+python -m src.pipeline /path/to/stems --project-dir ./my_project --export-adm
+
+# Example (macOS):
+python -m src.pipeline ~/Desktop/stems --project-dir ~/spatialSeed_output -u 0.5 -v 0.3
+```
+
+#### Streamlit UI
+
+```bash
+# Activate the virtual environment
+source activate.sh
+
+# Launch interactive web UI (opens at http://localhost:8501)
 streamlit run ui/app.py
 ```
+
+The UI provides:
+- Interactive 2D Seed Matrix control (u, v sliders)
+- Stem discovery and classification review
+- Per-stem category/role overrides
+- Real-time progress tracking
+- Results visualization and export management
 
 ## Architecture
 
@@ -142,23 +166,34 @@ See `config/defaults.json` for default settings. Key parameters:
 
 ## Development Status
 
-**Version 0.1.0** - Prototype implementation in progress
+**Version 0.2.0** - Core pipeline operational with MIR-driven enhancements
 
-Current status:
+**Pipeline stages** (all stages 0-9A complete):
+- [DONE] Session + Discovery (stage 0)
+- [DONE] Normalize Audio (stage 1)
+- [DONE] MIR Extraction (stage 2)
+- [DONE] Classification (stage 3)
+- [DONE] Seed Matrix (stage 4)
+- [DONE] SPF Resolution with Priority 1, 2, 5 enhancements (stage 5)
+- [DONE] Static Placement (stage 6)
+- [DONE] Gesture Generation (stage 7)
+- [DONE] LUSID Scene Assembly (stage 8)
+- [DONE] LUSID Package Export (stage 9)
+- [DONE] Optional ADM/BW64 Export (stage 9A)
 
-- [DONE] Complete module structure
-- [DONE] Virtual environment setup (init.sh / activate.sh)
-- [DONE] Session discovery and manifest generation (session.py)
-- [DONE] Audio normalisation -- resample, stereo split, bed WAVs (audio_io.py)
-- [DONE] MIR feature extraction via librosa (mir/extract.py)
-- [DONE] Classification with filename + MIR heuristic fallbacks (mir/classify.py)
-- [DONE] Seed Matrix analytic mapping (seed_matrix.py)
-- [DONE] End-to-end test with real stems -- stages 0-3 validated
-- [TODO] Spatial processing (spf.py, placement.py, gesture_engine.py)
-- [TODO] LUSID scene assembly (lusid_writer.py)
-- [TODO] Export packaging (export/lusid_package.py, export/adm_bw64.py)
-- [TODO] Essentia TF model integration (optional, falls back to heuristics)
-- [TODO] Streamlit UI
+**Recent enhancements** (Phase 8, April 2026):
+- [DONE] **Priority 1**: Context-aware profile selection (genre/energy/density modulation)
+- [DONE] **Priority 2**: Frequency-elevation coupling (spectral_centroid-based constraints)
+- [DONE] **Priority 5**: MIR tier 2 modulation (energy/flux/brightness → spread/motion_intensity)
+- [DEFERRED] **Priority 3**: Gesture parametric motion v3.1+ (tempo sync, onset reactivity)
+- [DEFERRED] **Priority 4**: Per-stem UI tuning v3.2+ (visual feedback refinements)
+- [TODO] **Priority 6**: Multi-stem validation framework
+
+**UI and tooling:**
+- [DONE] Streamlit UI with Seed Matrix 2D control
+- [DONE] Command-line interface with full pipeline
+- [DONE] LUSID package generation (drop-in for Spatial Root)
+- [DONE] ADM/BW64 export (Logic Pro Atmos compatible)
 
 ## Documentation
 

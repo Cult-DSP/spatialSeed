@@ -1201,6 +1201,7 @@ class SPFResolver:
         style_vector: np.ndarray,
         tags: Optional[Dict] = None,
         stereo_side: Optional[str] = None,
+        metadata: Optional[Dict] = None,
     ) -> StyleProfile:
         """
         Resolve StyleProfile from inputs.
@@ -1212,6 +1213,7 @@ class SPFResolver:
             style_vector:   8-dim z from SeedMatrix
             tags:           optional constraint flags
             stereo_side:    "left" or "right" for stereo-pair offset (or None)
+            metadata:       optional context dict: {genre, overall_energy, instrumentation_density}
 
         Returns:
             Fully resolved StyleProfile.
@@ -1230,6 +1232,82 @@ class SPFResolver:
         front_back_bias    = float(style_vector[5])
         ensemble_cohesion  = float(style_vector[6])
         modulation_sens    = float(style_vector[7])
+
+        # ========== PRIORITY 1: CONTEXT-AWARE PROFILE MODULATION ==========
+        # Adjust profile parameters based on genre/energy/density metadata
+        
+        if metadata:
+            genre = metadata.get("genre", "").lower()
+            overall_energy = metadata.get("overall_energy", 0.5)  # [0, 1]
+            instrumentation_density = metadata.get("instrumentation_density", 0.5)  # [0, 1]
+            
+            # Genre-specific modulation
+            if genre in ["jazz", "classical", "orchestral"]:
+                # Jazz/orchestral: slower, more cohesive motion
+                motion_intensity *= 0.7
+                ensemble_cohesion *= 1.2
+                placement_spread *= 0.8
+            elif genre in ["electronic", "edm", "synth", "techno", "house"]:
+                # Electronic: more reactive, higher modulation
+                motion_intensity *= 1.2
+                modulation_sens *= 1.1
+            elif genre in ["hip-hop", "rap", "trap"]:
+                # Hip-hop: punchy, focused drums, reactive
+                if "drum" in category.lower() or "percuss" in category.lower():
+                    motion_intensity *= 0.6  # Tighter drums
+                    placement_spread *= 0.7
+            
+            # Energy-based modulation
+            if overall_energy > 0.75:
+                # High energy: tighter, more focused
+                placement_spread *= 0.85
+                motion_intensity *= 1.1
+            elif overall_energy < 0.3:
+                # Low energy: wider, more diffuse
+                placement_spread *= 1.15
+                motion_intensity *= 0.8
+            
+            # Density-based modulation
+            if instrumentation_density > 0.7:
+                # Dense: tighter spreads to avoid masking
+                placement_spread *= 0.8
+                ensemble_cohesion *= 1.1
+            elif instrumentation_density < 0.3:
+                # Sparse: wider spreads for clarity
+                placement_spread *= 1.2
+            
+            # Clamp all modified values to [0, 1]
+            motion_intensity = max(0.0, min(1.0, motion_intensity))
+            modulation_sens = max(0.0, min(1.0, modulation_sens))
+            placement_spread = max(0.0, min(1.0, placement_spread))
+            ensemble_cohesion = max(0.0, min(1.0, ensemble_cohesion))
+
+        # ========== PRIORITY 2: FREQUENCY-ELEVATION COUPLING ==========
+        # Tie spectral_centroid to elevation constraints
+        
+        spectral_centroid = mir_features.get("spectral_centroid_mean", 2000.0)
+        
+        # Define frequency zones: estimate log frequency in [20Hz, 20kHz]
+        # Low freq: <250Hz (kick, bass) → elevation -8° to 0°
+        # Mid freq: 250Hz–3kHz (vocals, drums) → elevation 0° to 25°
+        # High freq: >3kHz (pads, cymbals, ambience) → elevation 40° to 90°
+        
+        freq_zone = "mid"  # default
+        if spectral_centroid < 250:
+            freq_zone = "low"
+        elif spectral_centroid > 3000:
+            freq_zone = "high"
+        
+        # Apply frequency-based height constraints
+        if freq_zone == "low":
+            # Low freq constrained to bottom: clamp elevation to -8° to 0°
+            profile.base_elevation_deg = max(-8.0, min(0.0, profile.base_elevation_deg))
+            profile.elevation_range_deg *= 0.3  # Reduce dynamic range
+        elif freq_zone == "high":
+            # High freq pushed up: clamp elevation to 40° to 90°
+            profile.base_elevation_deg = max(40.0, profile.base_elevation_deg)
+            profile.elevation_range_deg = max(15.0, profile.elevation_range_deg)
+        # Mid freq (zone == "mid"): use default profile values
 
         # ----- Azimuth -----
         # Base azimuth modulated by placement_spread
@@ -1315,12 +1393,23 @@ class SPFResolver:
         classifications: Dict,
         mir_summary: Dict,
         style_vector: np.ndarray,
+        metadata: Optional[Dict] = None,
     ) -> Dict[str, StyleProfile]:
         """
         Resolve StyleProfiles for all nodes.
 
         Uses the manifest to determine stereo pairing so that L/R channels
         are offset symmetrically.
+        
+        Args:
+            manifest: Stems manifest
+            classifications: node_id -> {category, role_hint, ...}
+            mir_summary: MIR features dict
+            style_vector: 8-dim z vector from Seed Matrix
+            metadata: optional {genre, overall_energy, instrumentation_density}
+        
+        Returns:
+            Dict[node_id -> StyleProfile]
         """
         print("Stage 5: SPF Resolution -> StyleProfile")
 
@@ -1335,10 +1424,43 @@ class SPFResolver:
                 for nid in nids:
                     stereo_map[nid] = None
 
+        # ========== PRIORITY 5: MIR TIER 2 MODULATION ==========
+        # Pre-compute global MIR statistics for spread/motion intensity modulation
+        
+        energy_values = []
+        flux_values = []
+        brightness_values = []
+        
+        for stem_data in mir_summary.get("stems", {}).values():
+            features = stem_data.get("features", {})
+            energy_values.append(features.get("rms_energy", 0.0))
+            flux_values.append(features.get("spectral_flux_mean", 0.0))
+            brightness_values.append(features.get("spectral_centroid_mean", 2000.0))
+        
+        # Compute percentiles for normalization
+        energy_p50 = np.median(energy_values) if energy_values else 0.5
+        flux_p50 = np.median(flux_values) if flux_values else 0.5
+        brightness_p50 = np.median(brightness_values) if brightness_values else 2000.0
+
         profiles: Dict[str, StyleProfile] = {}
         for node_id, classification in sorted(classifications.items()):
             mir_features = mir_summary.get("stems", {}).get(node_id, {}).get("features", {})
             side = stereo_map.get(node_id)
+
+            # Extract MIR features for modulation
+            energy_norm = min(1.0, mir_features.get("rms_energy", 0.0) / max(energy_p50, 0.01))
+            flux_norm = min(1.0, mir_features.get("spectral_flux_mean", 0.0) / max(flux_p50, 0.01))
+            brightness_norm = mir_features.get("spectral_centroid_mean", 2000.0) / 20000.0  # [0, 1]
+            
+            # Modulate spread based on MIR features (Priority 5)
+            # High energy → tighter spread (focus)
+            # High flux → wider spread (active, diffuse)
+            spread_mod = (1.0 - energy_norm * 0.3) * (0.8 + flux_norm * 0.4)
+            spread_mod = max(0.6, min(1.4, spread_mod))  # Clamp to [0.6, 1.4]
+            
+            # Modulate motion intensity based on brightness
+            # High brightness (cymbal, hi-hat) → increased motion_intensity
+            motion_int_mod = 0.8 + brightness_norm * 0.4  # [0.8, 1.2]
 
             sp = self.resolve_style_profile(
                 node_id=node_id,
@@ -1346,7 +1468,15 @@ class SPFResolver:
                 mir_features=mir_features,
                 style_vector=style_vector,
                 stereo_side=side,
+                metadata=metadata,
             )
+            
+            # Apply MIR tier 2 modulation to resolved profile
+            sp.spread = sp.spread * spread_mod
+            sp.spread = max(0.0, min(1.0, sp.spread))
+            sp.motion_intensity = sp.motion_intensity * motion_int_mod
+            sp.motion_intensity = max(0.0, min(1.0, sp.motion_intensity))
+            
             profiles[node_id] = sp
             print(
                 f"  {node_id}: {sp.category}/{sp.role}  "

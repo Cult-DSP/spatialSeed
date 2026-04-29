@@ -59,7 +59,8 @@ class SpatialSeedPipeline:
     
     def run(self, u: float = 0.5, v: float = 0.3,
            export_adm: bool = False,
-           classification_overrides: Optional[dict] = None) -> dict:
+           classification_overrides: Optional[dict] = None,
+           metadata: Optional[dict] = None) -> dict:
         """
         Run complete pipeline.
         
@@ -69,6 +70,10 @@ class SpatialSeedPipeline:
             export_adm: If True, also export ADM/BW64
             classification_overrides: Optional dict of node_id -> {category, role_hint}
                 overrides from the UI. Keys not present or set to "auto" are ignored.
+            metadata: Optional dict with context:
+                - genre: str (e.g., "jazz", "electronic", "hip-hop")
+                - overall_energy: float [0, 1]
+                - instrumentation_density: float [0, 1]
             
         Returns:
             Pipeline results dict
@@ -139,11 +144,12 @@ class SpatialSeedPipeline:
         selection_path = self.work_dir / "seed_selection.json"
         seed_matrix.save_selection(u, v, style_vector, str(selection_path))
         
-        # Stage 5: SPF Resolution -> StyleProfile
+        # Stage 5: SPF Resolution -> StyleProfile (with Priority 1, 2, 5 enhancements)
         spf_config_path = self.config.get("spf_config_path")
         spf_resolver = SPFResolver(spf_config_path=spf_config_path)
         profiles = spf_resolver.resolve_all_profiles(
-            manifest, classifications, mir_summary, style_vector
+            manifest, classifications, mir_summary, style_vector,
+            metadata=metadata  # Pass context metadata for Priority 1 & 2
         )
         
         # Save profiles
