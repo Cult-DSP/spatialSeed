@@ -12,13 +12,13 @@ Responsibilities:
 - Allow user override in UI
 - Cache classification results
 
-Per spec: classify_README.md, agents.md 8, 13.1
+Per spec: classify_README.md, agents.md 8, 13.2 (Essentia removed)
 
-NOTE on Essentia: The Essentia TF models (mtg_jamendo_instrument,
-fs_loop_ds) are imported lazily so the rest of the pipeline works even
-when essentia-tensorflow is not installed. When Essentia is unavailable
-the classifier falls through to filename and MIR heuristic fallbacks
-which are fully deterministic and require zero external models.
+NOTE: Essentia ML models have been removed (AGPLv3 licensing, heavy TensorFlow
+dependency). The classifier now uses purely deterministic fallbacks:
+1. Filename-based regex patterns (highest leverage)
+2. MIR heuristics from librosa features (when filename fails)
+All classification is deterministic, reproducible, and requires zero external ML models.
 """
 
 import json
@@ -116,9 +116,6 @@ class InstrumentClassifier:
     ]
     ROLES = ["bass", "rhythm", "lead", "percussion", "fx", "unknown"]
 
-    INSTRUMENT_MODEL = "mtg_jamendo_instrument-discogs-effnet"
-    ROLE_MODEL = "fs_loop_ds-msd-musicnn"
-
     CATEGORY_THRESHOLD = 0.35
     CATEGORY_MARGIN = 0.05
     ROLE_THRESHOLD = 0.60
@@ -126,26 +123,7 @@ class InstrumentClassifier:
     def __init__(self, cache_dir: str = "cache/classify"):
         self.cache_dir = Path(cache_dir)
         self.cache_dir.mkdir(parents=True, exist_ok=True)
-        self._essentia_available: Optional[bool] = None
-
-    # ------------------------------------------------------------------
-    # Essentia availability
-    # ------------------------------------------------------------------
-
-    def _check_essentia(self) -> bool:
-        if self._essentia_available is None:
-            try:
-                import essentia  # noqa: F401
-                import essentia.standard  # noqa: F401
-                self._essentia_available = True
-                logger.info("Essentia is available")
-            except ImportError:
-                self._essentia_available = False
-                logger.warning(
-                    "essentia-tensorflow not installed; "
-                    "classification will use fallbacks only"
-                )
-        return self._essentia_available
+        logger.info("InstrumentClassifier initialized (Essentia removed; using deterministic fallbacks only)")
 
     # ------------------------------------------------------------------
     # Cache
@@ -162,109 +140,6 @@ class InstrumentClassifier:
         cache_file = self.cache_dir / f"{audio_hash}.json"
         with open(cache_file, "w") as f:
             json.dump(result, f, indent=2)
-
-    # ------------------------------------------------------------------
-    # Essentia model runners
-    # ------------------------------------------------------------------
-
-    def run_essentia_instrument_classifier(self, wav_path: str) -> List[Dict]:
-        """
-        Run Essentia MTG-Jamendo instrument classifier (multi-label, 40 classes).
-        Resamples internally to 16 kHz.
-
-        Returns list of {label, p} sorted descending by probability.
-        """
-        import essentia.standard as es
-
-        audio = es.MonoLoader(filename=wav_path, sampleRate=16000)()
-
-        model = es.TensorflowPredictEffnetDiscogs(
-            graphFilename="essentia/test/models/discogs-effnet-bs64-1.pb",
-            output="PartitionedCall:1",
-        )
-        embeddings = model(audio)
-
-        classifier = es.TensorflowPredict2D(
-            graphFilename="essentia/test/models/mtg_jamendo_instrument-discogs-effnet-1.pb",
-            output="model/Softmax",
-        )
-        predictions = classifier(embeddings)
-
-        # Average across time frames
-        mean_preds = predictions.mean(axis=0)
-
-        # Build label list (the model metadata provides labels; use known ordering)
-        # TODO: load labels from model metadata json when available
-        # For now return raw index-probability pairs
-        results = [{"label": f"class_{i}", "p": float(p)} for i, p in enumerate(mean_preds)]
-        results.sort(key=lambda x: x["p"], reverse=True)
-        return results
-
-    def run_essentia_role_classifier(self, wav_path: str) -> Dict:
-        """
-        Run Essentia Freesound Loop role classifier (5 classes).
-        """
-        import essentia.standard as es
-
-        audio = es.MonoLoader(filename=wav_path, sampleRate=16000)()
-
-        model = es.TensorflowPredictMusiCNN(
-            graphFilename="essentia/test/models/fs_loop_ds-msd-musicnn-1.pb",
-            output="model/Softmax",
-        )
-        predictions = model(audio)
-        mean_preds = predictions.mean(axis=0)
-
-        # Known label order for fs_loop_ds
-        labels = ["bass", "chords", "fx", "melody", "percussion"]
-        role_probs = {label: float(mean_preds[i]) for i, label in enumerate(labels)}
-        return role_probs
-
-    # ------------------------------------------------------------------
-    # Mapping helpers
-    # ------------------------------------------------------------------
-
-    def map_instrument_to_category(
-        self, predictions: List[Dict]
-    ) -> Tuple[str, float]:
-        """
-        Map raw instrument predictions to canonical category.
-
-        Per spec (agents.md 13.1):
-        - Accumulate max probability per category
-        - Accept if score >= threshold and margin over second-best >= margin
-        """
-        category_scores: Dict[str, float] = {}
-        for pred in predictions:
-            label = pred["label"].lower().replace(" ", "")
-            cat = _LABEL_TO_CATEGORY.get(label)
-            if cat is None:
-                continue
-            if cat not in category_scores or pred["p"] > category_scores[cat]:
-                category_scores[cat] = pred["p"]
-
-        if not category_scores:
-            return "unknown", 0.0
-
-        sorted_cats = sorted(category_scores.items(), key=lambda x: x[1], reverse=True)
-        best_cat, best_score = sorted_cats[0]
-        second_score = sorted_cats[1][1] if len(sorted_cats) > 1 else 0.0
-
-        if best_score >= self.CATEGORY_THRESHOLD and (best_score - second_score) >= self.CATEGORY_MARGIN:
-            return best_cat, best_score
-
-        return "unknown", best_score
-
-    def map_role_to_hint(self, role_probs: Dict) -> Tuple[str, float]:
-        """
-        Map role model output to canonical role hint.
-        """
-        best_label = max(role_probs, key=role_probs.get)  # type: ignore[arg-type]
-        best_prob = role_probs[best_label]
-        hint = _ROLE_LABEL_MAP.get(best_label, "unknown")
-        if best_prob >= self.ROLE_THRESHOLD:
-            return hint, best_prob
-        return "unknown", best_prob
 
     # ------------------------------------------------------------------
     # Deterministic fallbacks
@@ -325,31 +200,8 @@ class InstrumentClassifier:
             "role_hint": "unknown",
             "role_confidence": 0.0,
             "top_labels": [],
-            "backend": {
-                "instrument_model": self.INSTRUMENT_MODEL,
-                "role_model": self.ROLE_MODEL,
-            },
             "fallbacks_used": [],
         }
-
-        # --- Try Essentia models first ------------------------------------
-        if self._check_essentia():
-            try:
-                instrument_preds = self.run_essentia_instrument_classifier(wav_path)
-                result["top_labels"] = instrument_preds[:5]
-                cat, cat_conf = self.map_instrument_to_category(instrument_preds)
-                role_probs = self.run_essentia_role_classifier(wav_path)
-                role_hint, role_conf = self.map_role_to_hint(role_probs)
-
-                if cat_conf >= self.CATEGORY_THRESHOLD:
-                    result["category"] = cat
-                    result["category_confidence"] = cat_conf
-                if role_conf >= self.ROLE_THRESHOLD:
-                    result["role_hint"] = role_hint
-                    result["role_confidence"] = role_conf
-            except Exception as exc:
-                logger.warning("Essentia classification failed for %s: %s", node_id, exc)
-                result["fallbacks_used"].append("essentia_error")
 
         # --- Fallback 1: filename hints -----------------------------------
         if result["category"] == "unknown" and stem_name:

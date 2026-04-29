@@ -50,7 +50,7 @@ SpatialSeed follows a 9-stage pipeline:
 
 1. **Session + Discovery** - Discover and validate stems
 2. **Normalize Audio** - Resample to 48 kHz, split stereo to mono
-3. **MIR Extraction** - Extract features using Essentia
+3. **MIR Extraction** - Extract features using librosa
 4. **Classification** - Classify instruments (category + role)
 5. **Seed Matrix** - Map (u,v) selection to style vector z
 6. **SPF Resolution** - Resolve spatial style profiles
@@ -176,10 +176,6 @@ Core:
 - librosa (audio resampling + MIR feature extraction)
 - soundfile (audio I/O)
 - LUSID (submodule, for ADM transcoding)
-
-Optional:
-
-- essentia-tensorflow (ML classification -- falls back to filename + MIR heuristics)
 
 UI (optional):
 

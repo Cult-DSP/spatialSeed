@@ -440,11 +440,84 @@ Agents should implement structured logging for:
 3. **Keyframe emission thresholds:** apply thresholds to **both position and spread**.
    - Default starting values (tunable): `pos_eps = 0.01` (normalized units), `spread_eps = 0.02`.
 4. **BW64/ADM packaging:** implement in **Python** for v1; add a TODO note that a C++ packager will likely be needed for performance/robustness later.
-5. **Stem classification (MIR):** use **Essentia pretrained models** as the default, with a license-aware fallback path.
+5. **Stem classification (MIR):** Use deterministic fallbacks only — **Essentia removed** (AGPLv3, heavy dependencies, unnecessary for real stems).
 
 ---
 
-## 13.1 MIR classifier recommendation (v1) — default stack
+## 13.2 Deterministic MIR-Only Classification (Essentia Removed)
+
+**Status:** Essentia has been removed (2026-04-29). The classification system now uses two deterministic tiers:
+
+### Tier 1: Filename Heuristics (Deterministic Regex)
+
+If the stem filename contains patterns like `"vox"`, `"LV"`, `"BV"`, `"drum"`, `"bass"`, etc., it's immediately classified without further analysis.
+
+```python
+# Examples from src/mir/classify.py:
+_FILENAME_PATTERNS = [
+    (re.compile(r"\bvox\b|\bvocal\b|\bLV\b|\bBV\b", re.I), "vocals", "lead"),
+    (re.compile(r"kick|snare|hat|drum|perc", re.I), "drums", "percussion"),
+    (re.compile(r"bass", re.I), "bass", "bass"),
+    (re.compile(r"gtr|guitar|\baco\b|acoustic", re.I), "guitar", "rhythm"),
+    (re.compile(r"piano|keys|rhodes|organ", re.I), "keys", "rhythm"),
+    (re.compile(r"string", re.I), "strings", "rhythm"),
+    (re.compile(r"synth|pad", re.I), "pads", "rhythm"),
+    (re.compile(r"fx|sfx|noise|ambient", re.I), "fx", "fx"),
+]
+```
+
+### Tier 2: MIR Heuristics (LibROSA Features)
+
+If Tier 1 doesn't match, fall back to `librosa` features already extracted in Stage 2:
+
+- **Bass:** Low spectral centroid + high harmonicity
+- **Drums/Percussion:** High onset density + low pitch confidence + low harmonic ratio
+- **Vocals:** Very high pitch confidence + mid-high centroid + sparse onsets
+- **Strings:** High pitch confidence + very high onset density (bowing)
+- **Guitar:** Mid centroid + moderate onsets + high harmonicity
+- **Keys:** Harmonic content + mid-range centroid
+- **Pads:** Low onset density + high spectral flatness
+
+All thresholds are tuned and deterministic (reproducible across runs).
+
+### Implementation
+
+See `src/mir/classify.py`:
+
+```python
+class InstrumentClassifier:
+    CATEGORIES = ["vocals", "bass", "drums", "percussion", 
+                  "guitar", "keys", "pads", "fx", "other", "unknown"]
+    
+    def classify_node(self, wav_path, node_id, stem_name, mir_features):
+        # Tier 1: Filename
+        result = self.apply_filename_fallback(stem_name)
+        if result:
+            return result
+        
+        # Tier 2: MIR heuristics
+        result = self.apply_mir_fallback(mir_features)
+        if result:
+            return result
+        
+        # Fallback: unknown
+        return ("unknown", "unknown")
+```
+
+### Verification
+
+Run tests to verify classification still works with real stems:
+
+```bash
+source activate.sh
+pytest tests/test_stages_0_3.py -v
+```
+
+Expected: All stems classify correctly (validated against 6 real stems on 2026-02-11).
+
+---
+
+## 13.1 [DEPRECATED] Essentia-Based Classification (Removed 2026-04-29)
 
 ### A) Primary instrument category: `mtg_jamendo_instrument-discogs-effnet` (multi-label, 40 classes)
 
