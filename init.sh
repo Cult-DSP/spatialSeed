@@ -53,32 +53,32 @@ echo "  Core packages installed."
 echo "[3/4] Initialising git submodules ..."
 git -C "$SCRIPT_DIR" submodule update --init
 
-# ------------------------------------------------------------------
-# 4. Optionally download Essentia ML models
-# ------------------------------------------------------------------
-if [ "$SKIP_MODELS" = false ]; then
-  echo "[4/4] Essentia models"
-  echo "  Do you want to download Essentia ML models? (y/n)"
-  read -r answer
-  if [ "$answer" = "y" ] || [ "$answer" = "Y" ]; then
-    if [ ! -d "$SCRIPT_DIR/essentia/test/models" ]; then
-      echo "  Downloading essentia models ..."
-      mkdir -p "$SCRIPT_DIR/essentia/test/models"
-      curl -L https://github.com/MTG/essentia-models/archive/refs/heads/master.zip \
-        -o /tmp/models.zip
-      unzip -q /tmp/models.zip -d /tmp
-      mv /tmp/essentia-models-master/* "$SCRIPT_DIR/essentia/test/models/"
-      rm -rf /tmp/essentia-models-master /tmp/models.zip
-      echo "  Models downloaded."
-    else
-      echo "  Essentia models directory already exists -- skipping."
-    fi
-  else
-    echo "  Skipping model download."
-  fi
-else
-  echo "[4/4] Skipping Essentia model download (--no-models)."
-fi
+# # ------------------------------------------------------------------
+# # 4. Optionally download Essentia ML models -- REMOVING ESSENTIA MODELS FOR NOW TO AVOID LFS ISSUES
+# # ------------------------------------------------------------------
+# if [ "$SKIP_MODELS" = false ]; then
+#   echo "[4/4] Essentia models"
+#   echo "  Do you want to download Essentia ML models? (y/n)"
+#   read -r answer
+#   if [ "$answer" = "y" ] || [ "$answer" = "Y" ]; then
+#     if [ ! -d "$SCRIPT_DIR/essentia/test/models" ]; then
+#       echo "  Downloading essentia models ..."
+#       mkdir -p "$SCRIPT_DIR/essentia/test/models"
+#       curl -L https://github.com/MTG/essentia-models/archive/refs/heads/master.zip \
+#         -o /tmp/models.zip
+#       unzip -q /tmp/models.zip -d /tmp
+#       mv /tmp/essentia-models-master/* "$SCRIPT_DIR/essentia/test/models/"
+#       rm -rf /tmp/essentia-models-master /tmp/models.zip
+#       echo "  Models downloaded."
+#     else
+#       echo "  Essentia models directory already exists -- skipping."
+#     fi
+#   else
+#     echo "  Skipping model download."
+#   fi
+# else
+#   echo "[4/4] Skipping Essentia model download (--no-models)."
+# fi
 
 # ------------------------------------------------------------------
 # Done

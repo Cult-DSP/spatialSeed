@@ -38,6 +38,7 @@ source activate.sh
 
 # Run pipeline from command line
 python src/pipeline.py /path/to/stems --project-dir ./my_project -u 0.5 -v 0.3
+source src/pipeline.py /Users/lucian/Desktop/ATMOS-projects/Riparian-Atmos/swale-solo-stems --project-dir /Users/lucian/Desktop/tmp -u 0.5 -v 0.3
 
 # Or use the Streamlit UI
 streamlit run ui/app.py
