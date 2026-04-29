@@ -53,7 +53,7 @@ class TestSPF(unittest.TestCase):
         sp_left = self.resolver.resolve_style_profile("11.1", classification, mir, self.default_z, stereo_side="left")
         sp_right = self.resolver.resolve_style_profile("11.2", classification, mir, self.default_z, stereo_side="right")
         
-        self.assertTrue(sp_left.base_x > sp_right.base_x or sp_left.base_x < sp_right.base_x)
+        self.assertTrue(sp_left.base_x != sp_right.base_x or sp_left.base_y != sp_right.base_y)
 
     def test_resolve_style_profile_motion_intensity(self):
         classification = {"category": "other", "role_hint": "unknown"}

@@ -85,7 +85,7 @@ repo root so that `from src.* import ...` resolves correctly.
 - [DONE] Edge case: mono stems -- Validated pipeline securely processes mono inputs.
 - [DONE] UI Polish -- Altair 2D Seed Matrix canvas injected and polished.
 - [DONE] **Deep MIR Analysis** -- Expanded `mir/extract.py` with advanced rhythm and timbral analysis (MFCCs, tonnetz, tempo, spectral contrast) and updated heuristics.
-- [TODO] **Downstream MIR Integration** -- Wire the newly extracted features (like `tempo_bpm`) into `gesture_engine.py` to drive tempo-synced spatial motion.
+- [DONE] **Downstream MIR Integration** -- Wire the newly extracted features (like `tempo_bpm`) into `gesture_engine.py` to drive tempo-synced spatial motion.
 
 ---
 
@@ -101,7 +101,7 @@ repo root so that `from src.* import ...` resolves correctly.
 20. **src/mir/classify.py** - [DONE] Improve heuristics
     - Updated fallback heuristics to use spectral contrast, max onset strength, and harmonic ratios for robust categorization.
 
-21. **src/gesture_engine.py** - [TODO] Wire features to downstream motion
+21. **src/gesture_engine.py** - [DONE] Wire features to downstream motion
     - Consume `tempo_bpm` to sync orbital motion periods to the track's musical grid.
 
 ## 1) Project mission (in one paragraph)

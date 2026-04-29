@@ -133,8 +133,21 @@ class GestureEngine:
         # Orbit radius: 0.1 .. 0.35
         radius = 0.10 + 0.25 * intensity
 
-        # Orbit period: faster at high intensity (6s .. 16s)
-        period = max(6.0, 16.0 * (1.0 - intensity))
+        tempo_bpm = mir_features.get("tempo_bpm", 0.0)
+        if tempo_bpm > 0:
+            # Sync to measures (assuming 4/4 time): 1 measure = 4 beats = 240 / tempo_bpm seconds
+            sec_per_measure = 240.0 / tempo_bpm
+            # Base measures on intensity: high intensity = fewer measures (faster)
+            if intensity > 0.7:
+                measures = 2.0
+            elif intensity > 0.3:
+                measures = 4.0
+            else:
+                measures = 8.0
+            period = sec_per_measure * measures
+        else:
+            # Orbit period: faster at high intensity (6s .. 16s)
+            period = max(6.0, 16.0 * (1.0 - intensity))
 
         # Phase offset per node
         phase = (hash(node_id) % 1000) / 1000.0 * 2.0 * math.pi
