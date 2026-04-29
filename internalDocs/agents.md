@@ -486,20 +486,20 @@ See `src/mir/classify.py`:
 
 ```python
 class InstrumentClassifier:
-    CATEGORIES = ["vocals", "bass", "drums", "percussion", 
+    CATEGORIES = ["vocals", "bass", "drums", "percussion",
                   "guitar", "keys", "pads", "fx", "other", "unknown"]
-    
+
     def classify_node(self, wav_path, node_id, stem_name, mir_features):
         # Tier 1: Filename
         result = self.apply_filename_fallback(stem_name)
         if result:
             return result
-        
+
         # Tier 2: MIR heuristics
         result = self.apply_mir_fallback(mir_features)
         if result:
             return result
-        
+
         # Fallback: unknown
         return ("unknown", "unknown")
 ```

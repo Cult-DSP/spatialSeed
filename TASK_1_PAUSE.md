@@ -4,19 +4,20 @@
 
 All Essentia references **completely removed**. Classification is now 100% deterministic.
 
-| File | Change | Impact |
-|------|--------|--------|
-| `src/mir/classify.py` | -162 lines | Removed all Essentia imports, model runners, ML inference |
-| `requirements.txt` | -3 lines | Removed `essentia-tensorflow` dependency |
-| `internalDocs/agents.md` | +77 lines | Added Section 13.2, updated specs, deprecated Section 13.1 |
-| `README.md` | -6 lines | Updated to reference librosa instead of Essentia |
-| **NET** | **-94 lines** | **Simpler, leaner codebase** |
+| File                     | Change        | Impact                                                     |
+| ------------------------ | ------------- | ---------------------------------------------------------- |
+| `src/mir/classify.py`    | -162 lines    | Removed all Essentia imports, model runners, ML inference  |
+| `requirements.txt`       | -3 lines      | Removed `essentia-tensorflow` dependency                   |
+| `internalDocs/agents.md` | +77 lines     | Added Section 13.2, updated specs, deprecated Section 13.1 |
+| `README.md`              | -6 lines      | Updated to reference librosa instead of Essentia           |
+| **NET**                  | **-94 lines** | **Simpler, leaner codebase**                               |
 
 ---
 
 ## New Classification Flow
 
 **Before (with Essentia):**
+
 ```
 Try Essentia models
   ├─ If confident: use result
@@ -25,6 +26,7 @@ Try Essentia models
 ```
 
 **After (Essentia removed):**
+
 ```
 Filename patterns (Tier 1)
   ├─ If match: return result
@@ -39,6 +41,7 @@ Filename patterns (Tier 1)
 ## ✅ Status: PAUSED (as requested)
 
 You asked to:
+
 1. ✅ Remove all Essentia → **DONE**
 2. ⏸️ **Pause for confirmation** ← **HERE NOW**
 3. Implement Seed Matrix Option A
@@ -68,9 +71,9 @@ When you're ready, I will:
 
 1. **Implement Seed Matrix Option A**
    - Add smooth nonlinear curves (Hermite smoothstep + sigmoid)
-   - Add interaction terms (u*v powers)
+   - Add interaction terms (u\*v powers)
    - Make ensemble_cohesion active (varies with v)
-   - Make mir_coupling stronger (varies with u*v)
+   - Make mir_coupling stronger (varies with u\*v)
    - File: `src/seed_matrix.py`
 
 2. **Create AI Hallucinated SPF Profiles (Option 1)**

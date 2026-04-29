@@ -376,6 +376,243 @@ class SPFResolver:
             source_citation="Mock source (2026): Sound Design height placement"
         )
 
+        # ======================================================================
+        # AI-GENERATED PROFILES (v2 Coverage Expansion)
+        # [AI-GENERATED] Source: Claude AI 2026-04-29 — created for extended
+        # category/role coverage. Tuned to match spatial mixing conventions.
+        # ======================================================================
+
+        # -- percussion (melodic) -- mallets, vibraphone, pitched percussion
+        self.instrument_profiles[("percussion", "melodic")] = InstrumentProfile(
+            category="percussion", role="melodic",
+            base_azimuth_deg=0.0, azimuth_spread_deg=25.0,
+            base_elevation_deg=12.0, elevation_range_deg=18.0,
+            base_distance=0.68,
+            default_spread=0.18,
+            motion_archetype="gentle_drift",
+            energy_sensitivity=0.25, flux_sensitivity=0.30, brightness_sensitivity=0.35,
+            source_citation="[AI-GENERATED] Vibraphone, marimba, pitched perc center-slightly elevated"
+        )
+
+        # -- percussion (mallet) -- timpani, xylophone, hard mallets
+        self.instrument_profiles[("percussion", "mallet")] = InstrumentProfile(
+            category="percussion", role="mallet",
+            base_azimuth_deg=-15.0, azimuth_spread_deg=35.0,
+            base_elevation_deg=20.0, elevation_range_deg=20.0,
+            base_distance=0.72,
+            default_spread=0.22,
+            motion_archetype="reactive",
+            energy_sensitivity=0.35, flux_sensitivity=0.40, brightness_sensitivity=0.40,
+            source_citation="[AI-GENERATED] Timpani, xylophone elevated stereo spread"
+        )
+
+        # -- vocals (harmony) -- backing harmonies, gang vocals
+        self.instrument_profiles[("vocals", "harmony")] = InstrumentProfile(
+            category="vocals", role="harmony",
+            base_azimuth_deg=0.0, azimuth_spread_deg=45.0,
+            base_elevation_deg=8.0, elevation_range_deg=12.0,
+            base_distance=0.72,
+            default_spread=0.25,
+            motion_archetype="gentle_drift",
+            energy_sensitivity=0.18, flux_sensitivity=0.12, brightness_sensitivity=0.22,
+            source_citation="[AI-GENERATED] Vocal harmony spread but cohesive, medium elevation"
+        )
+
+        # -- vocals (ambient) -- whispers, distant vocals, reverb trails
+        self.instrument_profiles[("vocals", "ambient")] = InstrumentProfile(
+            category="vocals", role="ambient",
+            base_azimuth_deg=180.0, azimuth_spread_deg=80.0,
+            base_elevation_deg=35.0, elevation_range_deg=25.0,
+            base_distance=0.80,
+            default_spread=0.32,
+            motion_archetype="orbit",
+            energy_sensitivity=0.10, flux_sensitivity=0.08, brightness_sensitivity=0.15,
+            source_citation="[AI-GENERATED] Ambient vocal envelopment rear/elevated"
+        )
+
+        # -- strings (pad) -- string pads, synth strings, orchestral swell
+        self.instrument_profiles[("strings", "pad")] = InstrumentProfile(
+            category="strings", role="pad",
+            base_azimuth_deg=0.0, azimuth_spread_deg=60.0,
+            base_elevation_deg=25.0, elevation_range_deg=25.0,
+            base_distance=0.78,
+            default_spread=0.30,
+            motion_archetype="orbit",
+            energy_sensitivity=0.15, flux_sensitivity=0.10, brightness_sensitivity=0.20,
+            source_citation="[AI-GENERATED] String pads enveloping, elevated-wide"
+        )
+
+        # -- brass (lead) -- trumpet, french horn leads
+        self.instrument_profiles[("brass", "lead")] = InstrumentProfile(
+            category="brass", role="lead",
+            base_azimuth_deg=0.0, azimuth_spread_deg=18.0,
+            base_elevation_deg=15.0, elevation_range_deg=12.0,
+            base_distance=0.68,
+            default_spread=0.14,
+            motion_archetype="gentle_drift",
+            energy_sensitivity=0.28, flux_sensitivity=0.25, brightness_sensitivity=0.32,
+            source_citation="[AI-GENERATED] Brass solo front-centered elevated"
+        )
+
+        # -- brass (harmony) -- brass harmonies, horn section backgrounds
+        self.instrument_profiles[("brass", "harmony")] = InstrumentProfile(
+            category="brass", role="harmony",
+            base_azimuth_deg=45.0, azimuth_spread_deg=40.0,
+            base_elevation_deg=18.0, elevation_range_deg=15.0,
+            base_distance=0.72,
+            default_spread=0.24,
+            motion_archetype="gentle_drift",
+            energy_sensitivity=0.25, flux_sensitivity=0.22, brightness_sensitivity=0.28,
+            source_citation="[AI-GENERATED] Brass section panned harmony"
+        )
+
+        # -- woodwinds (pad) -- clarinet pads, oboe pads, soft woodwinds
+        self.instrument_profiles[("woodwinds", "pad")] = InstrumentProfile(
+            category="woodwinds", role="pad",
+            base_azimuth_deg=-45.0, azimuth_spread_deg=35.0,
+            base_elevation_deg=12.0, elevation_range_deg=15.0,
+            base_distance=0.70,
+            default_spread=0.20,
+            motion_archetype="gentle_drift",
+            energy_sensitivity=0.18, flux_sensitivity=0.15, brightness_sensitivity=0.22,
+            source_citation="[AI-GENERATED] Soft woodwind pads left-slightly elevated"
+        )
+
+        # -- woodwinds (harmony) -- saxophone section, clarinet choir
+        self.instrument_profiles[("woodwinds", "harmony")] = InstrumentProfile(
+            category="woodwinds", role="harmony",
+            base_azimuth_deg=0.0, azimuth_spread_deg=50.0,
+            base_elevation_deg=8.0, elevation_range_deg=12.0,
+            base_distance=0.71,
+            default_spread=0.26,
+            motion_archetype="gentle_drift",
+            energy_sensitivity=0.22, flux_sensitivity=0.20, brightness_sensitivity=0.25,
+            source_citation="[AI-GENERATED] Woodwind ensemble spread front-center"
+        )
+
+        # -- synth (lead) -- synth solo, monophonic synth line
+        self.instrument_profiles[("synth", "lead")] = InstrumentProfile(
+            category="synth", role="lead",
+            base_azimuth_deg=0.0, azimuth_spread_deg=12.0,
+            base_elevation_deg=5.0, elevation_range_deg=10.0,
+            base_distance=0.65,
+            default_spread=0.10,
+            motion_archetype="gentle_drift",
+            energy_sensitivity=0.20, flux_sensitivity=0.18, brightness_sensitivity=0.30,
+            source_citation="[AI-GENERATED] Synth lead tight center slightly elevated"
+        )
+
+        # -- synth (pad) -- synth pads, atmospheric layers
+        self.instrument_profiles[("synth", "pad")] = InstrumentProfile(
+            category="synth", role="pad",
+            base_azimuth_deg=0.0, azimuth_spread_deg=75.0,
+            base_elevation_deg=22.0, elevation_range_deg=28.0,
+            base_distance=0.82,
+            default_spread=0.35,
+            motion_archetype="orbit",
+            energy_sensitivity=0.12, flux_sensitivity=0.08, brightness_sensitivity=0.18,
+            source_citation="[AI-GENERATED] Synth pad enveloping ambient layer"
+        )
+
+        # -- synth (bass) -- synth bass, sub bass, electronic low end
+        self.instrument_profiles[("synth", "bass")] = InstrumentProfile(
+            category="synth", role="bass",
+            base_azimuth_deg=0.0, azimuth_spread_deg=8.0,
+            base_elevation_deg=-8.0, elevation_range_deg=6.0,
+            base_distance=0.58,
+            default_spread=0.12,
+            motion_archetype="static",
+            energy_sensitivity=0.08, flux_sensitivity=0.05, brightness_sensitivity=0.05,
+            source_citation="[AI-GENERATED] Synth/electronic bass tight sub center"
+        )
+
+        # -- keys (pad) -- organ pad, electric piano swell
+        self.instrument_profiles[("keys", "pad")] = InstrumentProfile(
+            category="keys", role="pad",
+            base_azimuth_deg=60.0, azimuth_spread_deg=40.0,
+            base_elevation_deg=10.0, elevation_range_deg=15.0,
+            base_distance=0.70,
+            default_spread=0.22,
+            motion_archetype="gentle_drift",
+            energy_sensitivity=0.14, flux_sensitivity=0.10, brightness_sensitivity=0.18,
+            source_citation="[AI-GENERATED] Keys pad panned with gentle spread"
+        )
+
+        # -- guitar (fx) -- guitar effects, ambient guitar texture
+        self.instrument_profiles[("guitar", "fx")] = InstrumentProfile(
+            category="guitar", role="fx",
+            base_azimuth_deg=-75.0, azimuth_spread_deg=50.0,
+            base_elevation_deg=18.0, elevation_range_deg=20.0,
+            base_distance=0.75,
+            default_spread=0.28,
+            motion_archetype="orbit",
+            energy_sensitivity=0.15, flux_sensitivity=0.20, brightness_sensitivity=0.25,
+            source_citation="[AI-GENERATED] Guitar effects/ambience rear-elevated"
+        )
+
+        # -- guitar (bass) -- bass guitar, drop-tuned rhythm guitar
+        self.instrument_profiles[("guitar", "bass")] = InstrumentProfile(
+            category="guitar", role="bass",
+            base_azimuth_deg=0.0, azimuth_spread_deg=12.0,
+            base_elevation_deg=-6.0, elevation_range_deg=8.0,
+            base_distance=0.60,
+            default_spread=0.15,
+            motion_archetype="gentle_drift",
+            energy_sensitivity=0.18, flux_sensitivity=0.12, brightness_sensitivity=0.10,
+            source_citation="[AI-GENERATED] Bass guitar low center slightly dynamic"
+        )
+
+        # -- drums (kick) -- kick drum, bass drum, sub kick
+        self.instrument_profiles[("drums", "kick")] = InstrumentProfile(
+            category="drums", role="kick",
+            base_azimuth_deg=0.0, azimuth_spread_deg=6.0,
+            base_elevation_deg=-10.0, elevation_range_deg=4.0,
+            base_distance=0.52,
+            default_spread=0.08,
+            motion_archetype="static",
+            energy_sensitivity=0.10, flux_sensitivity=0.08, brightness_sensitivity=0.02,
+            source_citation="[AI-GENERATED] Kick drum sub-low center tight"
+        )
+
+        # -- drums (snare) -- snare, clap, rim shot
+        self.instrument_profiles[("drums", "snare")] = InstrumentProfile(
+            category="drums", role="snare",
+            base_azimuth_deg=30.0, azimuth_spread_deg=20.0,
+            base_elevation_deg=2.0, elevation_range_deg=8.0,
+            base_distance=0.65,
+            default_spread=0.12,
+            motion_archetype="reactive",
+            energy_sensitivity=0.32, flux_sensitivity=0.35, brightness_sensitivity=0.38,
+            source_citation="[AI-GENERATED] Snare/clap right-center punchy"
+        )
+
+        # -- drums (hat) -- hi-hat, closed hat, open hat
+        self.instrument_profiles[("drums", "hat")] = InstrumentProfile(
+            category="drums", role="hat",
+            base_azimuth_deg=-30.0, azimuth_spread_deg=15.0,
+            base_elevation_deg=5.0, elevation_range_deg=10.0,
+            base_distance=0.62,
+            default_spread=0.10,
+            motion_archetype="reactive",
+            energy_sensitivity=0.28, flux_sensitivity=0.42, brightness_sensitivity=0.45,
+            source_citation="[AI-GENERATED] Hi-hat left-center bright reactive"
+        )
+
+        # -- drums (tom) -- tom drums, floor tom, mid tom
+        self.instrument_profiles[("drums", "tom")] = InstrumentProfile(
+            category="drums", role="tom",
+            base_azimuth_deg=-60.0, azimuth_spread_deg=25.0,
+            base_elevation_deg=8.0, elevation_range_deg=12.0,
+            base_distance=0.68,
+            default_spread=0.16,
+            motion_archetype="reactive",
+            energy_sensitivity=0.30, flux_sensitivity=0.38, brightness_sensitivity=0.32,
+            source_citation="[AI-GENERATED] Tom drum wide-left elevated reactive"
+        )
+
+        # -- bass (rhythm) -- already defined above; this is redundancy check
+        # (kept to match original structure)
+
         # -- fallback "other" / "unknown" -- mid-field, static
         self.instrument_profiles[("other", "unknown")] = InstrumentProfile(
             category="other", role="unknown",

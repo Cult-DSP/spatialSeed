@@ -14,6 +14,7 @@ No external ML models, no TensorFlow, no AGPLv3 licensing issues.
 ## Files Modified
 
 ### 1. `src/mir/classify.py`
+
 - **Removed:** Essentia availability check (`_check_essentia()`)
 - **Removed:** Essentia model runners (`run_essentia_instrument_classifier()`, `run_essentia_role_classifier()`)
 - **Removed:** Label mapping helpers (`map_instrument_to_category()`, `map_role_to_hint()`)
@@ -23,16 +24,19 @@ No external ML models, no TensorFlow, no AGPLv3 licensing issues.
 - **Result:** ✅ No lint errors
 
 ### 2. `requirements.txt`
+
 - **Removed:** Commented line `# essentia-tensorflow>=2.1b6.dev1110`
 - **Kept:** numpy, scipy, librosa, soundfile, streamlit, pandas, jsonschema, tqdm
 - **Result:** Core dependencies only (ISC + Apache-2.0 licensed)
 
 ### 3. `README.md`
+
 - **Changed:** "Extract features using Essentia" → "Extract features using librosa"
 - **Removed:** Optional section listing essentia-tensorflow
 - **Result:** Dependencies section now simplified
 
 ### 4. `internalDocs/agents.md`
+
 - **Updated:** Section 13 (Locked answers) — changed requirement from "use Essentia" to "Use deterministic fallbacks only"
 - **Added:** New Section 13.2 — "Deterministic MIR-Only Classification (Essentia Removed)"
 - **Deprecated:** Old Section 13.1 → marked as [DEPRECATED], kept for historical reference

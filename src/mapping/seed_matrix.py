@@ -40,7 +40,7 @@ class SeedMatrix:
     
     def map_uv_to_z(self, u: float, v: float) -> np.ndarray:
         """
-        Map (u,v) selection to style vector z.
+        Map (u,v) selection to style vector z (UPGRADED v2).
         
         Args:
             u: Aesthetic variation [0,1]
@@ -49,37 +49,79 @@ class SeedMatrix:
         Returns:
             Style vector z, shape (Z_DIM,)
             
-        Per spec (DesignSpecV1.md § 7):
-        - v1: analytic mapping f(u,v)
-        - Future: replace with learned latent space while preserving UX
+        Per spec (agents.md § 14.2, upgraded v2):
+        Smooth nonlinear mapping with perceptual scaling and interaction terms.
         
-        Style vector components (v1 example):
-        - z[0]: placement spread (conservative → wide)
-        - z[1]: height usage (floor-level → full 3D)
-        - z[2]: motion intensity (controlled by v primarily)
-        - z[3]: motion complexity (paths vs orbits vs chaotic)
-        - z[4]: symmetry bias (symmetric → asymmetric)
-        - z[5]: front-back bias (front-heavy → surround)
-        - z[6]: ensemble cohesion (grouped → dispersed)
-        - z[7]: modulation sensitivity (MIR → motion coupling)
+        Style vector components (v2 upgraded):
+        - z[0]: placement spread (more with u, capped by v for conservative static scenes)
+        - z[1]: height usage (more with v, scaled by u for experimental)
+        - z[2]: motion intensity (primarily v, boosted by u for experimental dynamics)
+        - z[3]: motion complexity (only with high u AND v; avoid needless complexity)
+        - z[4]: symmetry breaking (more asymmetry with experimental u)
+        - z[5]: front-back bias (forward with conservative u; variance with experimental)
+        - z[6]: ensemble cohesion (NOW ACTIVE; tight with v, loose with u)
+        - z[7]: mir coupling (stronger with dynamic + experimental)
+        
+        Design rationale (agents.md § 14.2):
+        u = 0 (Conservative): tight cluster, very symmetric, front-heavy, low complexity
+        u = 1 (Experimental): wide distribution, asymmetric, varied positions, high complexity
+        v = 0 (Static): no motion, ground level, no reactivity
+        v = 1 (Immersive): multiple orbits, full 3D, strong MIR reactivity
         """
         # Clamp inputs
         u = np.clip(u, 0.0, 1.0)
         v = np.clip(v, 0.0, 1.0)
         
-        # Analytic mapping rules:
-        # u drives spatial spread/cohesion related parameters
-        # v primarily drives motion and reactivity parameters
+        # --- Smooth activation curves (perceptually natural control) ---
         
+        def smoothstep(x):
+            """Hermite smoothstep: 3x² - 2x³ (smooth S-curve)"""
+            return 3 * x**2 - 2 * x**3
+        
+        def sigmoid_like(x):
+            """Sigmoid-like curve using tanh: maps [0,1] to [0,1]"""
+            return np.tanh(2 * x - 1) * 0.5 + 0.5
+        
+        u_smooth = sigmoid_like(u)  # Perceptually smoother u scaling
+        v_smooth = smoothstep(v)     # Smooth v transitions
+        
+        # --- Build style vector with interaction terms ---
         z = np.zeros(self.Z_DIM, dtype=np.float32)
-        z[0] = 0.3 + 0.7 * u  # placement spread
-        z[1] = 0.2 + 0.8 * u  # height usage
-        z[2] = v              # motion intensity
-        z[3] = u * v          # motion complexity
-        z[4] = 1.0 - u * 0.5  # symmetry bias
-        z[5] = 0.5 + u * 0.3  # front-back bias
-        z[6] = u              # ensemble cohesion
-        z[7] = v * 0.8        # modulation sensitivity
+        
+        # z[0]: placement_spread
+        # More spread with u, but conservative static scenes stay tight
+        z[0] = u_smooth * (0.8 + 0.2 * v_smooth)
+        
+        # z[1]: height_usage
+        # More height with v (dynamic immersion), scaled by u (experimental)
+        z[1] = v_smooth * (0.5 + 0.5 * u_smooth)
+        
+        # z[2]: motion_intensity
+        # Primarily driven by v, boosted by u for experimental dynamics
+        z[2] = v_smooth * (0.6 + 0.4 * u_smooth)
+        
+        # z[3]: motion_complexity
+        # Only emerge when BOTH u and v are high (avoid complexity creep at medium values)
+        z[3] = (u_smooth * v_smooth) ** 1.5
+        
+        # z[4]: symmetry_breaking (1 - u_smooth = more symmetry when conservative)
+        z[4] = (1 - u_smooth) * 0.8
+        
+        # z[5]: front_back_bias
+        # More forward bias with conservative u; experimentation adds spatial variance
+        z[5] = 0.5 + 0.2 * (1 - u_smooth) + 0.15 * u_smooth * np.sin(3 * u)
+        
+        # z[6]: ensemble_cohesion (NOW VARIES!)
+        # Tight cohesion when v=0 (static), loose when v=1 (dispersed)
+        # Conservative u keeps them tighter
+        z[6] = (1 - v_smooth) * (0.8 + 0.2 * (1 - u_smooth))
+        
+        # z[7]: mir_coupling
+        # Stronger coupling with both dynamics (v) and experimentation (u)
+        z[7] = (u_smooth * v_smooth) ** 0.8
+        
+        # Ensure all values are in [0, 1]
+        z = np.clip(z, 0.0, 1.0)
         
         return z
     

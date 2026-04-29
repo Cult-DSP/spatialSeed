@@ -255,6 +255,8 @@ Responsibilities:
 
 - Verify whether all consumers support delta frames robustly; if not, add snapshot mode.
 - Evaluate distance (radius) vs spread/diffuseness perceptually.
-- Expand direct speaker templates beyond the current “room-centric” mapping.
+- Expand direct speaker templates beyond the current "room-centric" mapping.
 - Integrate MIR into LUSID `spectral_features` nodes later.
 - Revisit audio sample format (float32 vs int16) for compatibility + size.
+
+**→ See `SPF_GESTURE_V3_ROADMAP.md` for comprehensive v3+ future roadmap (parametric motion, tempo-synced orbits, context-aware profiles, etc.)**
