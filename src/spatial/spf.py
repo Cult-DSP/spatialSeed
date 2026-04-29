@@ -847,6 +847,276 @@ class SPFResolver:
             source_citation="[DATA-SHEET] RalphSutton.com (2023): Orchestral string ambient"
         )
 
+        # ======================================================================
+        # AMBIENT PADS & GRANULAR TEXTURES (v2.2 Content Focus)
+        # [AI-GENERATED] 20 new profiles: ambient pads, granular, sound design,
+        # field recordings. Tuned for envelopment, diffuseness, and spatial movement.
+        # ======================================================================
+
+        # -- ambient (pad_lush) -- Lush synth pad, enveloping, rear-elevated
+        self.instrument_profiles[("ambient", "pad_lush")] = InstrumentProfile(
+            category="ambient", role="pad_lush",
+            base_azimuth_deg=180.0, azimuth_spread_deg=80.0,
+            base_elevation_deg=40.0, elevation_range_deg=30.0,
+            base_distance=0.85,
+            default_spread=0.40,
+            motion_archetype="orbit",
+            energy_sensitivity=0.08, flux_sensitivity=0.05, brightness_sensitivity=0.12,
+            source_citation="[AI-GENERATED] Lush ambient pad enveloping rear-elevated diffuse"
+        )
+
+        # -- ambient (pad_ethereal) -- Ethereal, sparse, high-freq content
+        self.instrument_profiles[("ambient", "pad_ethereal")] = InstrumentProfile(
+            category="ambient", role="pad_ethereal",
+            base_azimuth_deg=90.0, azimuth_spread_deg=75.0,
+            base_elevation_deg=70.0, elevation_range_deg=20.0,
+            base_distance=0.88,
+            default_spread=0.38,
+            motion_archetype="orbit",
+            energy_sensitivity=0.05, flux_sensitivity=0.03, brightness_sensitivity=0.20,
+            source_citation="[AI-GENERATED] Ethereal ambient high-elevation sparse texture"
+        )
+
+        # -- ambient (pad_warm) -- Warm mid-range pad, front-centered
+        self.instrument_profiles[("ambient", "pad_warm")] = InstrumentProfile(
+            category="ambient", role="pad_warm",
+            base_azimuth_deg=0.0, azimuth_spread_deg=40.0,
+            base_elevation_deg=15.0, elevation_range_deg=20.0,
+            base_distance=0.75,
+            default_spread=0.28,
+            motion_archetype="gentle_drift",
+            energy_sensitivity=0.10, flux_sensitivity=0.08, brightness_sensitivity=0.10,
+            source_citation="[AI-GENERATED] Warm ambient pad front-centered diffuse"
+        )
+
+        # -- granular (texture_chaotic) -- Chaotic granular bursts, widely spread
+        self.instrument_profiles[("granular", "texture_chaotic")] = InstrumentProfile(
+            category="granular", role="texture_chaotic",
+            base_azimuth_deg=0.0, azimuth_spread_deg=100.0,
+            base_elevation_deg=0.0, elevation_range_deg=40.0,
+            base_distance=0.78,
+            default_spread=0.45,
+            motion_archetype="reactive",
+            energy_sensitivity=0.40, flux_sensitivity=0.55, brightness_sensitivity=0.45,
+            source_citation="[AI-GENERATED] Chaotic granular texture burst, highly reactive diffuse"
+        )
+
+        # -- granular (texture_crystalline) -- Crystalline glitchy granules, elevated
+        self.instrument_profiles[("granular", "texture_crystalline")] = InstrumentProfile(
+            category="granular", role="texture_crystalline",
+            base_azimuth_deg=30.0, azimuth_spread_deg=50.0,
+            base_elevation_deg=50.0, elevation_range_deg=25.0,
+            base_distance=0.80,
+            default_spread=0.35,
+            motion_archetype="reactive",
+            energy_sensitivity=0.32, flux_sensitivity=0.48, brightness_sensitivity=0.55,
+            source_citation="[AI-GENERATED] Crystalline glitch granular elevated bright"
+        )
+
+        # -- granular (texture_organic) -- Organic pitched granular, drift motion
+        self.instrument_profiles[("granular", "texture_organic")] = InstrumentProfile(
+            category="granular", role="texture_organic",
+            base_azimuth_deg=-45.0, azimuth_spread_deg=40.0,
+            base_elevation_deg=20.0, elevation_range_deg=15.0,
+            base_distance=0.72,
+            default_spread=0.25,
+            motion_archetype="gentle_drift",
+            energy_sensitivity=0.18, flux_sensitivity=0.25, brightness_sensitivity=0.30,
+            source_citation="[AI-GENERATED] Organic granular texture left-elevated drifting"
+        )
+
+        # -- sounddesign (whoosh) -- Whoosh/transition effect, fast pan motion
+        self.instrument_profiles[("sounddesign", "whoosh")] = InstrumentProfile(
+            category="sounddesign", role="whoosh",
+            base_azimuth_deg=0.0, azimuth_spread_deg=80.0,
+            base_elevation_deg=10.0, elevation_range_deg=25.0,
+            base_distance=0.68,
+            default_spread=0.30,
+            motion_archetype="orbit",
+            energy_sensitivity=0.50, flux_sensitivity=0.60, brightness_sensitivity=0.40,
+            source_citation="[AI-GENERATED] Whoosh transition effect wide panned reactive"
+        )
+
+        # -- sounddesign (metallic_shine) -- Metallic/bell resonances, high-Q
+        self.instrument_profiles[("sounddesign", "metallic_shine")] = InstrumentProfile(
+            category="sounddesign", role="metallic_shine",
+            base_azimuth_deg=45.0, azimuth_spread_deg=30.0,
+            base_elevation_deg=35.0, elevation_range_deg=20.0,
+            base_distance=0.65,
+            default_spread=0.18,
+            motion_archetype="gentle_drift",
+            energy_sensitivity=0.25, flux_sensitivity=0.35, brightness_sensitivity=0.60,
+            source_citation="[AI-GENERATED] Metallic bell shine elevated bright reactive"
+        )
+
+        # -- sounddesign (underwater) -- Underwater/filtered ambience, rear
+        self.instrument_profiles[("sounddesign", "underwater")] = InstrumentProfile(
+            category="sounddesign", role="underwater",
+            base_azimuth_deg=180.0, azimuth_spread_deg=60.0,
+            base_elevation_deg=-20.0, elevation_range_deg=15.0,
+            base_distance=0.80,
+            default_spread=0.32,
+            motion_archetype="gentle_drift",
+            energy_sensitivity=0.12, flux_sensitivity=0.08, brightness_sensitivity=0.05,
+            source_citation="[AI-GENERATED] Underwater filtered reverb rear-low diffuse"
+        )
+
+        # -- sounddesign (digital_glitch) -- Digital glitch/artifact, scattered
+        self.instrument_profiles[("sounddesign", "digital_glitch")] = InstrumentProfile(
+            category="sounddesign", role="digital_glitch",
+            base_azimuth_deg=-60.0, azimuth_spread_deg=70.0,
+            base_elevation_deg=25.0, elevation_range_deg=30.0,
+            base_distance=0.72,
+            default_spread=0.35,
+            motion_archetype="reactive",
+            energy_sensitivity=0.45, flux_sensitivity=0.50, brightness_sensitivity=0.55,
+            source_citation="[AI-GENERATED] Digital glitch artifact scattered high-elevation reactive"
+        )
+
+        # -- fieldrecording (wind_flutter) -- Field: wind/breath texture, diffuse
+        self.instrument_profiles[("fieldrecording", "wind_flutter")] = InstrumentProfile(
+            category="fieldrecording", role="wind_flutter",
+            base_azimuth_deg=0.0, azimuth_spread_deg=85.0,
+            base_elevation_deg=5.0, elevation_range_deg=30.0,
+            base_distance=0.82,
+            default_spread=0.40,
+            motion_archetype="gentle_drift",
+            energy_sensitivity=0.15, flux_sensitivity=0.20, brightness_sensitivity=0.08,
+            source_citation="[AI-GENERATED] Field recording: wind/breath flutter diffuse"
+        )
+
+        # -- fieldrecording (rain_ambient) -- Field: rain texture, enveloping
+        self.instrument_profiles[("fieldrecording", "rain_ambient")] = InstrumentProfile(
+            category="fieldrecording", role="rain_ambient",
+            base_azimuth_deg=180.0, azimuth_spread_deg=100.0,
+            base_elevation_deg=45.0, elevation_range_deg=30.0,
+            base_distance=0.86,
+            default_spread=0.42,
+            motion_archetype="gentle_drift",
+            energy_sensitivity=0.20, flux_sensitivity=0.25, brightness_sensitivity=0.15,
+            source_citation="[AI-GENERATED] Field recording: rain ambient enveloping overhead"
+        )
+
+        # -- fieldrecording (water_flow) -- Field: water/stream, front-left
+        self.instrument_profiles[("fieldrecording", "water_flow")] = InstrumentProfile(
+            category="fieldrecording", role="water_flow",
+            base_azimuth_deg=-30.0, azimuth_spread_deg=45.0,
+            base_elevation_deg=-8.0, elevation_range_deg=12.0,
+            base_distance=0.70,
+            default_spread=0.28,
+            motion_archetype="gentle_drift",
+            energy_sensitivity=0.18, flux_sensitivity=0.22, brightness_sensitivity=0.10,
+            source_citation="[AI-GENERATED] Field recording: water stream flow left-low"
+        )
+
+        # -- fieldrecording (forest_ambience) -- Field: forest/bird ambience, rear-elevated
+        self.instrument_profiles[("fieldrecording", "forest_ambience")] = InstrumentProfile(
+            category="fieldrecording", role="forest_ambience",
+            base_azimuth_deg=120.0, azimuth_spread_deg=70.0,
+            base_elevation_deg=35.0, elevation_range_deg=25.0,
+            base_distance=0.80,
+            default_spread=0.35,
+            motion_archetype="orbit",
+            energy_sensitivity=0.15, flux_sensitivity=0.12, brightness_sensitivity=0.25,
+            source_citation="[AI-GENERATED] Field recording: forest birds ambience rear-elevated"
+        )
+
+        # -- fieldrecording (urban_hum) -- Field: urban electrical hum/buzz
+        self.instrument_profiles[("fieldrecording", "urban_hum")] = InstrumentProfile(
+            category="fieldrecording", role="urban_hum",
+            base_azimuth_deg=0.0, azimuth_spread_deg=30.0,
+            base_elevation_deg=-15.0, elevation_range_deg=20.0,
+            base_distance=0.68,
+            default_spread=0.20,
+            motion_archetype="static",
+            energy_sensitivity=0.08, flux_sensitivity=0.05, brightness_sensitivity=0.08,
+            source_citation="[AI-GENERATED] Field recording: urban electrical hum low-center"
+        )
+
+        # -- ambient (decay_tail) -- Reverb decay tail, diffuse overhead
+        self.instrument_profiles[("ambient", "decay_tail")] = InstrumentProfile(
+            category="ambient", role="decay_tail",
+            base_azimuth_deg=0.0, azimuth_spread_deg=90.0,
+            base_elevation_deg=75.0, elevation_range_deg=15.0,
+            base_distance=0.88,
+            default_spread=0.35,
+            motion_archetype="gentle_drift",
+            energy_sensitivity=0.05, flux_sensitivity=0.03, brightness_sensitivity=0.10,
+            source_citation="[AI-GENERATED] Reverb decay tail diffuse overhead"
+        )
+
+        # -- ambient (resonance_ring) -- Resonant ring/swell, elevated orbit
+        self.instrument_profiles[("ambient", "resonance_ring")] = InstrumentProfile(
+            category="ambient", role="resonance_ring",
+            base_azimuth_deg=90.0, azimuth_spread_deg=60.0,
+            base_elevation_deg=50.0, elevation_range_deg=25.0,
+            base_distance=0.80,
+            default_spread=0.30,
+            motion_archetype="orbit",
+            energy_sensitivity=0.12, flux_sensitivity=0.08, brightness_sensitivity=0.18,
+            source_citation="[AI-GENERATED] Resonant ring/swell elevated orbiting"
+        )
+
+        # -- granular (dust_particles) -- Granular 'dust' micro-particles, sparse
+        self.instrument_profiles[("granular", "dust_particles")] = InstrumentProfile(
+            category="granular", role="dust_particles",
+            base_azimuth_deg=-90.0, azimuth_spread_deg=50.0,
+            base_elevation_deg=60.0, elevation_range_deg=30.0,
+            base_distance=0.75,
+            default_spread=0.25,
+            motion_archetype="gentle_drift",
+            energy_sensitivity=0.15, flux_sensitivity=0.20, brightness_sensitivity=0.35,
+            source_citation="[AI-GENERATED] Granular dust particles left-rear-elevated sparse"
+        )
+
+        # -- sounddesign (morphing_texture) -- Morphing evolving texture, center orbit
+        self.instrument_profiles[("sounddesign", "morphing_texture")] = InstrumentProfile(
+            category="sounddesign", role="morphing_texture",
+            base_azimuth_deg=0.0, azimuth_spread_deg=40.0,
+            base_elevation_deg=25.0, elevation_range_deg=30.0,
+            base_distance=0.76,
+            default_spread=0.28,
+            motion_archetype="orbit",
+            energy_sensitivity=0.25, flux_sensitivity=0.30, brightness_sensitivity=0.35,
+            source_citation="[AI-GENERATED] Morphing evolving texture center-elevated orbit"
+        )
+
+        # -- sounddesign (shimmer_halo) -- Shimmering halo effect, high-spread
+        self.instrument_profiles[("sounddesign", "shimmer_halo")] = InstrumentProfile(
+            category="sounddesign", role="shimmer_halo",
+            base_azimuth_deg=45.0, azimuth_spread_deg=85.0,
+            base_elevation_deg=55.0, elevation_range_deg=30.0,
+            base_distance=0.82,
+            default_spread=0.38,
+            motion_archetype="gentle_drift",
+            energy_sensitivity=0.18, flux_sensitivity=0.15, brightness_sensitivity=0.50,
+            source_citation="[AI-GENERATED] Shimmer halo effect high-spread elevated bright"
+        )
+
+        # -- ambient (void_infinite) -- Infinite void ambience, rear-far distance
+        self.instrument_profiles[("ambient", "void_infinite")] = InstrumentProfile(
+            category="ambient", role="void_infinite",
+            base_azimuth_deg=180.0, azimuth_spread_deg=100.0,
+            base_elevation_deg=0.0, elevation_range_deg=40.0,
+            base_distance=0.92,
+            default_spread=0.45,
+            motion_archetype="orbit",
+            energy_sensitivity=0.05, flux_sensitivity=0.02, brightness_sensitivity=0.05,
+            source_citation="[AI-GENERATED] Infinite void ambience rear-far minimal energy"
+        )
+
+        # -- fieldrecording (traffic_distant) -- Field: distant traffic, front-low
+        self.instrument_profiles[("fieldrecording", "traffic_distant")] = InstrumentProfile(
+            category="fieldrecording", role="traffic_distant",
+            base_azimuth_deg=0.0, azimuth_spread_deg=35.0,
+            base_elevation_deg=-12.0, elevation_range_deg=18.0,
+            base_distance=0.74,
+            default_spread=0.24,
+            motion_archetype="gentle_drift",
+            energy_sensitivity=0.22, flux_sensitivity=0.20, brightness_sensitivity=0.15,
+            source_citation="[AI-GENERATED] Field recording: distant traffic front-low drift"
+        )
+
         # Load and integrate additional profiles from data sheets dynamically
         try:
             sheets = load_spf_data_sheets()
