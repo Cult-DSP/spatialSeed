@@ -11,16 +11,13 @@
 > 2. **[DONE]** Test edge case with Mono stems. We created a mono test file (`00_mono_vox.wav`) and validated that the pipeline completely and securely processes mono inputs alongside stereo.
 > 3. **[DONE]** Rename all instances of "sonoPleth" to "Spatial Root" across the project docs and code.
 > 4. **[IN PROGRESS]** UI polish of the Seed Matrix. We have just injected a 2D interactive canvas visualization using `pandas` and `altair` into `ui/app.py`.
-> 5. **[PENDING]** Investigate and add proper ADM export to the `cult_transcoder` submodule from the LUSID package.
+> 5. **[DONE]** Deprecated Python ADM export (`src/export/adm_bw64.py`) in favor of the `cult_transcoder` C++ authoring module (`src/authoring`).
 >
 > **Immediate Next Steps for You:**
 >
 > 1. Activate the environment: `source activate.sh` (**NO `pip install` commands allowed!**).
 > 2. Test the Streamlit UI: Run `PYTHONPATH=. streamlit run ui/app.py` to ensure the Altair 2D Seed Matrix canvas renders correctly and is polished enough for the user. Fix any layout/type issues if they arise.
-> 3. Tackle Task 5 (ADM Export): The user specifically requested, "look at adding proper adm export to cult transcoder from lusid package."
->    - Context: `cult_transcoder` is currently a C++ CLI that converts `adm_xml` -> `lusid_json`.
->    - `src/export/adm_bw64.py` currently holds Python logic for ADM export.
->    - You need to determine if we should add the reverse transcoding (`lusid_json` -> `adm_xml`) into the C++ `cult_transcoder` repo, or if the python logic needs to be hooked up. Check `cult_transcoder/internalDocs/DEV-PLAN-CULT.md`.
+> 3. **[DONE]** Cleaned up the repository and removed unused Python files (e.g., `src/export/adm_bw64.py`).
 >
 > Good luck!
 
@@ -88,8 +85,8 @@ repo root so that `from src.* import ...` resolves correctly.
 - [DONE] Unit tests per module -- Only `seed_matrix` and `spf` tests are written but using python's built-in `unittest`. Moved writing remainder of unit tests to the end of the roadmap.
 - [TODO] Config-driven pipeline -- config/defaults.json exists but pipeline.py uses hardcoded values. Wire config through (gesture thresholds, z_dim, etc.).
 - [TODO] Edge case: mono stems -- session.py supports mono (1 group) but no test coverage. Verify full pipeline with mono input.
-- [TO DO] ADM export (export/adm_bw64.py) -- should be written as cpp in the cult transcoder submodule - follow the rest of cult transcoder conventions and initialize repo
-- [To do] clean up repo and unused files
+- [DONE] ADM export -- Removed Python implementation in favor of `cult_transcoder` C++ authoring module (`src/authoring`).
+- [DONE] Cleaned up repo and removed unused files (e.g., `src/export/adm_bw64.py`).
 
 ---
 
@@ -192,7 +189,7 @@ Produces:
   2. objects: `11.1`, `12.1`, …
 - optional sidecar `export.adm.xml` (debug-friendly)
 
-**ADM packaging rule:** beds first, then objects, always include beds.
+**ADM packaging rule:** beds first, then objects, always include beds. This authoring path is exclusively owned by the `cult_transcoder` C++ module.
 
 ---
 
@@ -335,10 +332,9 @@ SpatialSeed uses the provided direct-speaker template (pluggable later for other
 ### Stage 9 — Exports
 
 - Export LUSID package folder (primary)
-- Export ADM/BW64 (secondary):
-  - call LUSID transcoder for ADM XML
-  - SpatialSeed writes BW64 with correct channel order
-  - embed `axml` + `chna`
+- Export ADM/BW64 (secondary - delegated to `cult_transcoder`):
+  - SpatialSeed invokes `cult_transcoder` CLI for ADM authoring
+  - `cult_transcoder` handles BW64 channel order, embedding `axml` + `chna`
 
 ---
 
@@ -357,7 +353,7 @@ SpatialSeed uses the provided direct-speaker template (pluggable later for other
 ### 9.3 Don’t hardcode format-specific beds
 
 - Only bed mapping code should depend on Atmos labels.
-- Everything else must treat beds as a template input.
+- Everything else must treat beds as a template input. (Note: ADM authoring in `cult_transcoder` natively handles output.)
 
 ### 9.4 Determinism is a feature
 
@@ -621,15 +617,13 @@ See `internalDocs/IMPLEMENTATION_SUMMARY.md` for:
 
 14. **Test milestone:** Run full pipeline (stages 0-9), generate LUSID package
 
-### Phase 5: ADM Export (Priority 3 - Optional)
+### Phase 5: ADM Export (DELEGATED TO CULT_TRANSCODER)
 
-**Goal:** Export ADM/BW64 for DAW import
+**Goal:** Delegate ADM/BW64 export to `cult_transcoder`
 
-15. **src/export/adm_bw64.py** - Implement BW64 packaging
-    - Integrate with LUSID transcoder (test LUSID submodule)
-    - Implement `interleave_wavs()` using numpy + scipy/soundfile
-    - Implement `embed_adm_xml()` (may need external tool or library)
-    - Test: LUSID package → BW64 file
+15. **ADM Export** - [MOVED TO C++]
+    - All ADM authoring logic has been moved to the `cult_transcoder` C++ module (`src/authoring`).
+    - The unused Python implementation (`src/export/adm_bw64.py`) has been removed.
 
 16. **Test milestone:** Generate ADM/BW64, verify Logic Pro import
 
@@ -889,9 +883,9 @@ def compute_rms_db(audio: np.ndarray) -> float:
 
 **ADM export (Phase 5):**
 
-- Code written in export/adm_bw64.py (LUSID-to-ADM XML generation, WAV interleaving via
-  soundfile/numpy, sidecar XML export) but user said "for now, we dont have to worry about
-  the adm portion". ADM export deferred -- not needed for v1.
+- Python implementation removed. All ADM authoring and BW64 packaging
+  must happen in the `cult_transcoder` C++ submodule (`src/authoring/`).
+  Python should only call the `cult_transcoder` CLI for ADM export tasks.
 
 **Phase 6 -- Streamlit UI:**
 
@@ -926,4 +920,5 @@ def compute_rms_db(audio: np.ndarray) -> float:
 - Phases 1-4: DONE (stages 0-9A, all tested)
 - Phase 5: DEFERRED (ADM export, code written but untested)
 - Phase 6: DONE (Streamlit UI, fully functional)
+- Remaining: ADM export testing, unit test expansion, UI polish (2D canvas, per-stage progress)
 - Remaining: ADM export testing, unit test expansion, UI polish (2D canvas, per-stage progress)

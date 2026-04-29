@@ -50,7 +50,6 @@ spatialSeed/
 │   └── export/
 │       ├── __init__.py
 │       ├── lusid_package.py      # Stage 9A: LUSID package export
-│       └── adm_bw64.py           # Stage 9B: ADM/BW64 export
 ├── ui/
 │   └── app.py                    # Streamlit UI entry point
 ├── config/
@@ -172,12 +171,10 @@ spatialSeed/
 - WAV file organization
 - Package validation
 
-### Stage 9B: ADM/BW64 (src/export/adm_bw64.py)
+### Stage 9B: ADM/BW64 (Delegated to cult_transcoder)
 
-- Calls LUSID transcoder for ADM XML
-- BW64 audio interleaving (beds first, then objects)
-- axml + chna chunk embedding
-- Optional sidecar XML for debug
+- Python implementation removed.
+- Handled entirely by `cult_transcoder` C++ submodule (`src/authoring`).
 
 ### UI (ui/app.py)
 
@@ -241,7 +238,7 @@ Classification accuracy (both filename and MIR-only paths produce correct result
 
 ### [DEFERRED] ADM Export
 
-- **Stage 9B -- export/adm_bw64.py:** Code written but needs update for cult_transcoder.
+- **Stage 9B:** Python implementation removed. ADM authoring is explicitly delegated to `cult_transcoder`.
 
 ### [TODO] Remaining
 
@@ -295,9 +292,8 @@ Every module contains explicit `TODO:` comments indicating where implementation 
 The core pipeline (Phases 1-4, 6) is complete. Remaining work:
 
 1. **ADM export** (Phase 5 -- deferred)
-   - Code exists in export/adm_bw64.py but is untested end-to-end
-   - Integrate LUSID transcoder for ADM XML validation
-   - Verify Logic Pro import
+   - Python implementation removed in favor of `cult_transcoder` C++ submodule.
+   - Verify Logic Pro import via `cult_transcoder` CLI output.
 
 2. **Test suite expansion** (tests/)
    - Unit tests per module
