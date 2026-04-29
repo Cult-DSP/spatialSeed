@@ -5,19 +5,17 @@
 > **Welcome!** If you are reading this, you are picking up from the previous agent's session.
 >
 > **Task Context & Progress:**
-> The user provided a 5-step priority list. Here is where we stand:
+> The core pipeline (audio I/O, classification, spatial placement, LUSID export) and Streamlit UI are now fully implemented and stable.
+> Old tasks (UI polish, ADM deprecation, mono stem edge cases) are complete.
 >
-> 1. **[DONE]** Config-Driven Architecture. `src/pipeline.py` and module initializations have been refactored to read from `config/defaults.json`.
-> 2. **[DONE]** Test edge case with Mono stems. We created a mono test file (`00_mono_vox.wav`) and validated that the pipeline completely and securely processes mono inputs alongside stereo.
-> 3. **[DONE]** Rename all instances of "sonoPleth" to "Spatial Root" across the project docs and code.
-> 4. **[IN PROGRESS]** UI polish of the Seed Matrix. We have just injected a 2D interactive canvas visualization using `pandas` and `altair` into `ui/app.py`.
-> 5. **[DONE]** Deprecated Python ADM export (`src/export/adm_bw64.py`) in favor of the `cult_transcoder` C++ authoring module (`src/authoring`).
+> **Our new primary focus is deepening MIR (Music Information Retrieval) and audio analysis capabilities.**
 >
 > **Immediate Next Steps for You:**
 >
 > 1. Activate the environment: `source activate.sh` (**NO `pip install` commands allowed!**).
-> 2. Test the Streamlit UI: Run `PYTHONPATH=. streamlit run ui/app.py` to ensure the Altair 2D Seed Matrix canvas renders correctly and is polished enough for the user. Fix any layout/type issues if they arise.
-> 3. **[DONE]** Cleaned up the repository and removed unused Python files (e.g., `src/export/adm_bw64.py`).
+> 2. Review the current MIR extraction in `src/mir/extract.py` and classification in `src/mir/classify.py`.
+> 3. Propose and implement advanced MIR features or improved analysis heuristics (e.g., better onset detection, rhythm analysis, harmonic content mapping).
+> 4. Ensure any new MIR features are cleanly integrated into the `mir_summary.json` output and cached properly.
 >
 > Good luck!
 
@@ -81,14 +79,26 @@ repo root so that `from src.* import ...` resolves correctly.
 - [DONE] Expand SPF profile coverage -- extended spf.py profiles to include backing vocals, percussion, lead keys, lead strings, brass, woodwinds, choir, and sound design.
 - [DONE] LUSID schema validation -- lusid_writer.py validates against LUSID/schema/lusid_scene_v0.5.schema.json using jsonschema.
 - [DONE] MIR extraction speedup -- Optimized librosa STFT reuse, switched audio loading to soundfile, and wrapped the loop in ProcessPoolExecutor for concurrent batching.
-- [TODO] Spatial Root renderer smoke test -- Section 10 requires loading LUSID package into Spatial Root to verify object positions, delta frames, LFE recognition. Never tested.
+- [TODO] Spatial Root renderer smoke test -- requires loading LUSID package into Spatial Root to verify object positions, delta frames, LFE recognition.
 - [DONE] Unit tests per module -- Only `seed_matrix` and `spf` tests are written but using python's built-in `unittest`. Moved writing remainder of unit tests to the end of the roadmap.
-- [TODO] Config-driven pipeline -- config/defaults.json exists but pipeline.py uses hardcoded values. Wire config through (gesture thresholds, z_dim, etc.).
-- [TODO] Edge case: mono stems -- session.py supports mono (1 group) but no test coverage. Verify full pipeline with mono input.
-- [DONE] ADM export -- Removed Python implementation in favor of `cult_transcoder` C++ authoring module (`src/authoring`).
-- [DONE] Cleaned up repo and removed unused files (e.g., `src/export/adm_bw64.py`).
+- [DONE] Config-driven pipeline -- Wired `config/defaults.json` through stages.
+- [DONE] Edge case: mono stems -- Validated pipeline securely processes mono inputs.
+- [DONE] UI Polish -- Altair 2D Seed Matrix canvas injected and polished.
+- [TODO] **Deep MIR Analysis** -- Expand `mir/extract.py` and heuristics to improve spatialization decisions based on advanced rhythm and timbral analysis.
 
 ---
+
+### Phase 7: Advanced MIR & Analysis (CURRENT FOCUS)
+
+**Goal:** Deepen the audio analysis capabilities to drive smarter spatialization.
+
+19. **src/mir/extract.py** - Expand feature set
+    - Implement more advanced rhythm and harmonic analysis features.
+    - Refine onset detection to better capture transients.
+    - Integrate new features into the output `mir_summary.json` and ensure cache compatibility.
+
+20. **src/mir/classify.py** - Improve heuristics
+    - Use the new MIR features to build more robust fallback heuristics.
 
 ## 1) Project mission (in one paragraph)
 

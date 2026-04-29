@@ -289,20 +289,19 @@ Every module contains explicit `TODO:` comments indicating where implementation 
 
 ## Next Steps
 
-The core pipeline (Phases 1-4, 6) is complete. Remaining work:
+The core pipeline (Phases 1-4, 6) is complete. **Current focus is on Advanced MIR & Analysis.**
 
-1. **ADM export** (Phase 5 -- deferred)
-   - Python implementation removed in favor of `cult_transcoder` C++ submodule.
-   - Verify Logic Pro import via `cult_transcoder` CLI output.
+1. **Advanced MIR & Analysis (Current Focus)**
+   - Deepen extraction capabilities in `src/mir/extract.py` (e.g., rhythm, advanced harmonic analysis).
+   - Improve fallback heuristics in `src/mir/classify.py`.
+   - Tie new MIR features into spatial placement logic.
 
-2. **Test suite expansion** (tests/)
+2. **Test suite expansion**
    - Unit tests per module
    - Edge cases (mono stems, very short stems, many stems)
 
-3. **UI polish**
-   - 2D Seed Matrix canvas visualization
-   - Per-stage progress indicator during generation
-   - Export download button
+3. **Renderer compatibility smoke test**
+   - Load LUSID package into Spatial Root to verify objects and delta frames.
 
 ## Resources
 
