@@ -5,17 +5,17 @@
 > **Welcome!** If you are reading this, you are picking up from the previous agent's session.
 >
 > **Task Context & Progress:**
-> The core pipeline (audio I/O, classification, spatial placement, LUSID export) and Streamlit UI are now fully implemented and stable.
-> Old tasks (UI polish, ADM deprecation, mono stem edge cases) are complete.
+> The core pipeline, UI, and deep MIR extraction (`librosa` advanced features) are fully implemented.
+> We have successfully deepened the MIR extraction to include `tempo_bpm`, `tonnetz`, `mfcc`, and `spectral_contrast`.
 >
-> **Our new primary focus is deepening MIR (Music Information Retrieval) and audio analysis capabilities.**
+> **Our new primary focus is finishing the MIR component by wiring these advanced features into the downstream spatial processing.**
 >
 > **Immediate Next Steps for You:**
 >
 > 1. Activate the environment: `source activate.sh` (**NO `pip install` commands allowed!**).
-> 2. Review the current MIR extraction in `src/mir/extract.py` and classification in `src/mir/classify.py`.
-> 3. Propose and implement advanced MIR features or improved analysis heuristics (e.g., better onset detection, rhythm analysis, harmonic content mapping).
-> 4. Ensure any new MIR features are cleanly integrated into the `mir_summary.json` output and cached properly.
+> 2. Review the new documentation in `internalDocs/MIR.md` to understand the newly extracted features.
+> 3. Update `src/gesture_engine.py` to utilize `tempo_bpm` for orbital motion speeds (e.g., syncing orbits to exact measures/beats).
+> 4. Verify the UI (`ui/app.py`) cleanly handles or displays the new MIR pipeline additions if necessary.
 >
 > Good luck!
 
@@ -84,21 +84,25 @@ repo root so that `from src.* import ...` resolves correctly.
 - [DONE] Config-driven pipeline -- Wired `config/defaults.json` through stages.
 - [DONE] Edge case: mono stems -- Validated pipeline securely processes mono inputs.
 - [DONE] UI Polish -- Altair 2D Seed Matrix canvas injected and polished.
-- [TODO] **Deep MIR Analysis** -- Expand `mir/extract.py` and heuristics to improve spatialization decisions based on advanced rhythm and timbral analysis.
+- [DONE] **Deep MIR Analysis** -- Expanded `mir/extract.py` with advanced rhythm and timbral analysis (MFCCs, tonnetz, tempo, spectral contrast) and updated heuristics.
+- [TODO] **Downstream MIR Integration** -- Wire the newly extracted features (like `tempo_bpm`) into `gesture_engine.py` to drive tempo-synced spatial motion.
 
 ---
 
 ### Phase 7: Advanced MIR & Analysis (CURRENT FOCUS)
 
-**Goal:** Deepen the audio analysis capabilities to drive smarter spatialization.
+**Goal:** Deepen the audio analysis capabilities to drive smarter, tempo-synced spatialization.
 
-19. **src/mir/extract.py** - Expand feature set
-    - Implement more advanced rhythm and harmonic analysis features.
-    - Refine onset detection to better capture transients.
-    - Integrate new features into the output `mir_summary.json` and ensure cache compatibility.
+19. **src/mir/extract.py** - [DONE] Expand feature set
+    - Implemented advanced rhythm and harmonic analysis features (MFCC, tonnetz, spectral contrast, tempo_bpm).
+    - Refined onset detection with backtracking to better capture transients.
+    - Integrated new features into the output `mir_summary.json`.
 
-20. **src/mir/classify.py** - Improve heuristics
-    - Use the new MIR features to build more robust fallback heuristics.
+20. **src/mir/classify.py** - [DONE] Improve heuristics
+    - Updated fallback heuristics to use spectral contrast, max onset strength, and harmonic ratios for robust categorization.
+
+21. **src/gesture_engine.py** - [TODO] Wire features to downstream motion
+    - Consume `tempo_bpm` to sync orbital motion periods to the track's musical grid.
 
 ## 1) Project mission (in one paragraph)
 
@@ -932,3 +936,14 @@ def compute_rms_db(audio: np.ndarray) -> float:
 - Phase 6: DONE (Streamlit UI, fully functional)
 - Remaining: ADM export testing, unit test expansion, UI polish (2D canvas, per-stage progress)
 - Remaining: ADM export testing, unit test expansion, UI polish (2D canvas, per-stage progress)
+
+### 2026-04-29 -- Phase 7 MIR Deepening complete
+
+**What was done:**
+
+- Expanded `src/mir/extract.py` with advanced `librosa` features: `tempo_bpm`, `mfcc_mean`, `spectral_contrast_mean`, `tonnetz_mean`, and backtrack onset tracking.
+- Updated `src/mir/classify.py` to utilize these deeper features for fallback classification heuristics (better bass detection via spectral contrast, better percussion detection).
+- Optimized feature extraction by reusing STFT harmonics for Chroma/Tonnetz evaluations.
+- Created `internalDocs/MIR.md` to formally document the pipeline architecture, extraction capabilities, classification strategy, and downstream consumption goals.
+
+**Next:** Wire the new `tempo_bpm` and advanced features into `src/gesture_engine.py` for tempo-synced spatial orbits.
