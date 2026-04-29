@@ -109,8 +109,14 @@ class MIRExtractor:
         flux_mean = float(np.mean(oenv))
 
         # -- Onset density -------------------------------------------------
-        onsets = librosa.onset.onset_detect(onset_envelope=oenv, sr=sr)
+        # Use backtrack=True to shift onset events back to the local minimum
+        onsets = librosa.onset.onset_detect(onset_envelope=oenv, sr=sr, backtrack=True)
         onset_density = float(len(onsets) / duration) if duration > 0 else 0.0
+        max_onset_strength = float(np.max(oenv))
+
+        # -- Tempo (BPM) ---------------------------------------------------
+        tempo, _ = librosa.beat.beat_track(onset_envelope=oenv, sr=sr)
+        tempo_bpm = float(tempo[0]) if isinstance(tempo, np.ndarray) else float(tempo)
 
         # -- Pitch confidence (via piptrack) -------------------------------
         pitches, magnitudes = librosa.piptrack(S=S, sr=sr)
@@ -127,6 +133,11 @@ class MIRExtractor:
             float(harm_energy / total_energy) if total_energy > 0 else 0.5
         )
 
+        # -- Tonnetz (Tonal Centroids) -------------------------------------
+        chroma = librosa.feature.chroma_stft(S=np.abs(D_harm), sr=sr)
+        tonnetz = librosa.feature.tonnetz(chroma=chroma)
+        tonnetz_mean = np.mean(tonnetz, axis=1).tolist()
+
         # -- Spectral flatness ---------------------------------------------
         flatness = librosa.feature.spectral_flatness(S=S)[0]
         flatness_mean = float(np.mean(flatness))
@@ -134,6 +145,14 @@ class MIRExtractor:
         # -- Zero crossing rate --------------------------------------------
         zcr = librosa.feature.zero_crossing_rate(y)[0]
         zcr_mean = float(np.mean(zcr))
+
+        # -- Spectral Contrast ---------------------------------------------
+        spectral_contrast = librosa.feature.spectral_contrast(S=S, sr=sr)
+        spectral_contrast_mean = np.mean(spectral_contrast, axis=1).tolist()
+
+        # -- MFCCs ---------------------------------------------------------
+        mfccs = librosa.feature.mfcc(y=y, sr=sr, n_mfcc=13)
+        mfcc_mean = np.mean(mfccs, axis=1).tolist()
 
         features: Dict = {
             "duration_seconds": round(duration, 4),
@@ -146,6 +165,11 @@ class MIRExtractor:
             "harmonic_ratio": round(harmonic_ratio, 4),
             "spectral_flatness_mean": round(flatness_mean, 6),
             "zero_crossing_rate_mean": round(zcr_mean, 6),
+            "max_onset_strength": round(max_onset_strength, 4),
+            "tempo_bpm": round(tempo_bpm, 2),
+            "tonnetz_mean": [round(float(x), 4) if not np.isnan(x) else 0.0 for x in tonnetz_mean],
+            "spectral_contrast_mean": [round(float(x), 4) if not np.isnan(x) else 0.0 for x in spectral_contrast_mean],
+            "mfcc_mean": [round(float(x), 4) if not np.isnan(x) else 0.0 for x in mfcc_mean],
         }
 
         # Persist cache
@@ -326,12 +350,22 @@ def apply_mir_heuristics_for_category(features: Dict) -> Optional[str]:
     flatness = features.get("spectral_flatness_mean", 0.0)
     harmonic_ratio = features.get("harmonic_ratio", 0.5)
 
+    max_onset_strength = features.get("max_onset_strength", 0.0)
+    spectral_contrast = features.get("spectral_contrast_mean", [])
+
     # Bass: low centroid with reasonable harmonicity
     if centroid < 1000 and harmonic_ratio > 0.8 and pitch_conf > 0.6:
+        # Check low-frequency band contrast (band 0 usually covers 0-200Hz)
+        if spectral_contrast and spectral_contrast[0] > 15.0:
+            return "bass"
         return "bass"
 
     # Drums / percussion: high onset density + low pitch confidence
     if onset_density > 2.5 and pitch_conf < 0.5 and centroid > 2000:
+        return "drums"
+
+    # Drums: strong transients and low pitch confidence
+    if max_onset_strength > 10.0 and pitch_conf < 0.3 and harmonic_ratio < 0.4:
         return "drums"
 
     # Percussion (sparse): low harmonic ratio
@@ -345,18 +379,33 @@ def apply_mir_heuristics_for_category(features: Dict) -> Optional[str]:
     # --- Harmonic content zone (harmonic_ratio > 0.65) ---
     if harmonic_ratio > 0.65:
 
+        # Strings / Pads: very smooth attack, highly harmonic
+        if pitch_conf > 0.8 and onset_density < 2.0 and harmonic_ratio > 0.8:
+            if centroid > 2000:
+                return "strings"
+            else:
+                return "pads"
+
+        # Vocals: very high pitch confidence + mid-high centroid
+        if pitch_conf > 0.75 and 1000 < centroid < 4000:
+            # Vocals often sit distinctively in mid bands 3 & 4
+            if spectral_contrast and len(spectral_contrast) > 4 and (spectral_contrast[3] > 18.0 or spectral_contrast[4] > 18.0):
+                return "vocals"
+            # Fallback for vocals
+            if pitch_conf > 0.9 and onset_density < 3.0:
+                return "vocals"
+
         # Strings: very high pitch confidence + very high onset density
         # (bowed strings produce many micro-onsets from vibrato/bow changes)
         if pitch_conf > 0.9 and onset_density > 8.0 and centroid > 1500:
             return "strings"
 
-        # Vocals: very high pitch confidence + mid-high centroid + sparse onsets
-        if pitch_conf > 0.9 and centroid > 2000 and onset_density < 3.0:
-            return "vocals"
-
-        # Guitar / acoustic: lower centroid, moderate onsets, very harmonic
-        if harmonic_ratio > 0.9 and 800 < centroid < 2000 and onset_density > 2.0:
-            return "guitar"
+        # Guitar / Keys
+        if 500 < centroid < 3000 and harmonic_ratio > 0.6:
+            if 2.0 < onset_density < 8.0:
+                return "guitar"
+            else:
+                return "keys"
 
         # Keys: everything else harmonic
         if 500 < centroid < 6000:
