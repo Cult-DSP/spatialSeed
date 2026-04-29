@@ -9,6 +9,11 @@ Responsibilities:
 - Store minimal trace for reproducibility
 
 Per spec: DesignSpecV1.md 2.1, 3.1, agents.md 8
+
+Data Sheet Integration (v2.1):
+- Loads data from src/spfData/*.json (spfDataSheetA.json, spfDataTemplate.json)
+- Generates variants for stereo instruments (hi-hats, toms, etc.)
+- Enriches profiles with sheet-based source citations
 """
 
 import math
@@ -16,6 +21,7 @@ import numpy as np
 import json
 from typing import Dict, List, Optional, Tuple
 from dataclasses import dataclass, asdict, field
+from pathlib import Path
 
 
 # ======================================================================
@@ -118,6 +124,116 @@ def clamp_to_cube(x: float, y: float, z: float) -> Tuple[float, float, float]:
         max(-1.0, min(1.0, x)),
         max(-1.0, min(1.0, y)),
         max(-1.0, min(1.0, z)),
+    )
+
+
+# ======================================================================
+# Data Sheet Loaders (v2.1)
+# ======================================================================
+
+def load_spf_data_sheets():
+    """
+    Load and merge SPF data from JSON sheets.
+    
+    Returns:
+        list of dicts with keys: instrument, group, role, az, el, dist, 
+        source_name, source_url, publication_year, attribution, license_type
+    """
+    sheets = []
+    sheet_dir = Path(__file__).parent.parent / "spfData"
+    
+    if not sheet_dir.exists():
+        return sheets
+    
+    # Load spfDataSheetA.json (primary - drum kit, stereo variants)
+    sheet_a_path = sheet_dir / "spfDataSheetA.json"
+    if sheet_a_path.exists():
+        try:
+            with open(sheet_a_path, "r") as f:
+                data = json.load(f)
+                sheets.extend(data)
+        except Exception as e:
+            print(f"Warning: Could not load {sheet_a_path}: {e}")
+    
+    # Load spfDataTemplate.json (secondary - reference sources)
+    template_path = sheet_dir / "spfDataTemplate.json"
+    if template_path.exists():
+        try:
+            with open(template_path, "r") as f:
+                data = json.load(f)
+                sheets.extend(data)
+        except Exception as e:
+            print(f"Warning: Could not load {template_path}: {e}")
+    
+    return sheets
+
+
+def create_sheet_based_profile(sheet_entry: dict, variant_suffix: str = "") -> Optional[InstrumentProfile]:
+    """
+    Convert a sheet entry to InstrumentProfile.
+    
+    Args:
+        sheet_entry: dict with az, el, dist, instrument, source_name, etc.
+        variant_suffix: optional suffix for profile key (e.g., "_left", "_right")
+    
+    Returns:
+        InstrumentProfile or None if mapping unclear
+    """
+    # Extract coordinates
+    az = sheet_entry.get("az", sheet_entry.get("azimuth", 0.0))
+    el = sheet_entry.get("el", sheet_entry.get("elevation", 0.0))
+    dist = sheet_entry.get("dist", sheet_entry.get("distance", 0.7))
+    
+    instrument = sheet_entry.get("instrument", sheet_entry.get("instrument_category", "unknown"))
+    role = sheet_entry.get("role", "unknown")
+    
+    source_name = sheet_entry.get("source_name", "Unknown")
+    source_url = sheet_entry.get("source_url", "")
+    pub_year = sheet_entry.get("publication_year", sheet_entry.get("year", 2026))
+    attribution = sheet_entry.get("attribution", "")
+    
+    # Build citation
+    citation = f"{source_name} ({pub_year}): {instrument} variant"
+    if attribution:
+        citation = f"{attribution} - {citation}"
+    
+    # Infer sensitivities from instrument type
+    instrument_lower = instrument.lower()
+    if "kick" in instrument_lower or "bass" in instrument_lower:
+        energy_sens, flux_sens, bright_sens = 0.10, 0.08, 0.02
+    elif "snare" in instrument_lower or "clap" in instrument_lower:
+        energy_sens, flux_sens, bright_sens = 0.32, 0.35, 0.38
+    elif "hat" in instrument_lower or "hi-hat" in instrument_lower:
+        energy_sens, flux_sens, bright_sens = 0.28, 0.42, 0.45
+    elif "tom" in instrument_lower or "floor" in instrument_lower:
+        energy_sens, flux_sens, bright_sens = 0.30, 0.38, 0.32
+    elif "cymbal" in instrument_lower or "crash" in instrument_lower:
+        energy_sens, flux_sens, bright_sens = 0.35, 0.50, 0.50
+    else:
+        energy_sens, flux_sens, bright_sens = 0.15, 0.15, 0.20
+    
+    # Infer motion archetype
+    if "kick" in instrument_lower or "bass" in instrument_lower:
+        motion = "static"
+    elif "hat" in instrument_lower or "snare" in instrument_lower or "tom" in instrument_lower:
+        motion = "reactive"
+    else:
+        motion = "gentle_drift"
+    
+    return InstrumentProfile(
+        category=instrument.lower().replace("-", "_"),
+        role=role.lower().replace("-", "_"),
+        base_azimuth_deg=float(az),
+        azimuth_spread_deg=max(10.0, abs(float(az)) * 0.3),  # Heuristic spread
+        base_elevation_deg=float(el),
+        elevation_range_deg=max(5.0, abs(float(el)) * 0.4),  # Heuristic range
+        base_distance=float(dist),
+        default_spread=0.12 + (abs(float(az)) / 180.0) * 0.15,  # Wider for extreme azimuths
+        motion_archetype=motion,
+        energy_sensitivity=energy_sens,
+        flux_sensitivity=flux_sens,
+        brightness_sensitivity=bright_sens,
+        source_citation=f"[DATA-SHEET] {citation}" + (f" {variant_suffix}" if variant_suffix else ""),
     )
 
 
@@ -612,6 +728,140 @@ class SPFResolver:
 
         # -- bass (rhythm) -- already defined above; this is redundancy check
         # (kept to match original structure)
+
+        # ======================================================================
+        # STEREO DRUM VARIANTS from Data Sheets (v2.1)
+        # Explicit left/right channel profiles for drum kit panning
+        # ======================================================================
+
+        # -- drums (hihat_left) -- Closed hi-hat left channel (MusicGuyMixing)
+        self.instrument_profiles[("drums", "hihat_left")] = InstrumentProfile(
+            category="drums", role="hihat_left",
+            base_azimuth_deg=-30.0, azimuth_spread_deg=8.0,
+            base_elevation_deg=0.0, elevation_range_deg=5.0,
+            base_distance=0.62,
+            default_spread=0.08,
+            motion_archetype="reactive",
+            energy_sensitivity=0.28, flux_sensitivity=0.42, brightness_sensitivity=0.45,
+            source_citation="[DATA-SHEET] MusicGuyMixing (2023): Hi-Hat Left at -30°"
+        )
+
+        # -- drums (hihat_right) -- Closed hi-hat right channel (MusicGuyMixing)
+        self.instrument_profiles[("drums", "hihat_right")] = InstrumentProfile(
+            category="drums", role="hihat_right",
+            base_azimuth_deg=30.0, azimuth_spread_deg=8.0,
+            base_elevation_deg=0.0, elevation_range_deg=5.0,
+            base_distance=0.62,
+            default_spread=0.08,
+            motion_archetype="reactive",
+            energy_sensitivity=0.28, flux_sensitivity=0.42, brightness_sensitivity=0.45,
+            source_citation="[DATA-SHEET] MusicGuyMixing (2023): Hi-Hat Right at +30°"
+        )
+
+        # -- drums (floortom_left) -- Floor tom left channel (DrumAudioEditing)
+        self.instrument_profiles[("drums", "floortom_left")] = InstrumentProfile(
+            category="drums", role="floortom_left",
+            base_azimuth_deg=-90.0, azimuth_spread_deg=15.0,
+            base_elevation_deg=0.0, elevation_range_deg=8.0,
+            base_distance=0.68,
+            default_spread=0.14,
+            motion_archetype="reactive",
+            energy_sensitivity=0.30, flux_sensitivity=0.38, brightness_sensitivity=0.32,
+            source_citation="[DATA-SHEET] DrumAudioEditing (2025): Floor Tom Left at -90°"
+        )
+
+        # -- drums (floortom_right) -- Floor tom right channel (DrumAudioEditing)
+        self.instrument_profiles[("drums", "floortom_right")] = InstrumentProfile(
+            category="drums", role="floortom_right",
+            base_azimuth_deg=90.0, azimuth_spread_deg=15.0,
+            base_elevation_deg=0.0, elevation_range_deg=8.0,
+            base_distance=0.68,
+            default_spread=0.14,
+            motion_archetype="reactive",
+            energy_sensitivity=0.30, flux_sensitivity=0.38, brightness_sensitivity=0.32,
+            source_citation="[DATA-SHEET] DrumAudioEditing (2025): Floor Tom Right at +90°"
+        )
+
+        # -- drums (rack_tom) -- Rack tom (mid tom center-right) (DrumAudioEditing)
+        self.instrument_profiles[("drums", "rack_tom")] = InstrumentProfile(
+            category="drums", role="rack_tom",
+            base_azimuth_deg=45.0, azimuth_spread_deg=20.0,
+            base_elevation_deg=10.0, elevation_range_deg=12.0,
+            base_distance=0.68,
+            default_spread=0.14,
+            motion_archetype="reactive",
+            energy_sensitivity=0.32, flux_sensitivity=0.38, brightness_sensitivity=0.35,
+            source_citation="[DATA-SHEET] DrumAudioEditing (2025): Rack Tom Center-Right"
+        )
+
+        # -- drums (cymbal_crash) -- Crash cymbal (wide, bright)
+        self.instrument_profiles[("drums", "cymbal_crash")] = InstrumentProfile(
+            category="drums", role="cymbal_crash",
+            base_azimuth_deg=0.0, azimuth_spread_deg=70.0,
+            base_elevation_deg=15.0, elevation_range_deg=20.0,
+            base_distance=0.72,
+            default_spread=0.32,
+            motion_archetype="reactive",
+            energy_sensitivity=0.35, flux_sensitivity=0.50, brightness_sensitivity=0.50,
+            source_citation="[DATA-SHEET] Studio standard: Crash cymbal wide bright"
+        )
+
+        # -- drums (cymbal_ride) -- Ride cymbal (center-right, sustained)
+        self.instrument_profiles[("drums", "cymbal_ride")] = InstrumentProfile(
+            category="drums", role="cymbal_ride",
+            base_azimuth_deg=15.0, azimuth_spread_deg=25.0,
+            base_elevation_deg=5.0, elevation_range_deg=8.0,
+            base_distance=0.65,
+            default_spread=0.16,
+            motion_archetype="gentle_drift",
+            energy_sensitivity=0.25, flux_sensitivity=0.35, brightness_sensitivity=0.40,
+            source_citation="[DATA-SHEET] Studio standard: Ride cymbal center-right"
+        )
+
+        # ======================================================================
+        # ADDITIONAL SHEET-BASED VARIANTS (v2.1)
+        # Derived from spfDataTemplate.json for genre/context variations
+        # ======================================================================
+
+        # -- vocals (choir_ambient) -- From template: choir at el 90
+        self.instrument_profiles[("vocals", "choir_ambient")] = InstrumentProfile(
+            category="vocals", role="choir_ambient",
+            base_azimuth_deg=0.0, azimuth_spread_deg=85.0,
+            base_elevation_deg=90.0, elevation_range_deg=15.0,
+            base_distance=0.85,
+            default_spread=0.38,
+            motion_archetype="orbit",
+            energy_sensitivity=0.15, flux_sensitivity=0.10, brightness_sensitivity=0.15,
+            source_citation="[DATA-SHEET] RalphSutton.com (2023): Choral envelopment overhead"
+        )
+
+        # -- strings (orchestral_ambience) -- From template: strings ambience elevated
+        self.instrument_profiles[("strings", "orchestral_ambience")] = InstrumentProfile(
+            category="strings", role="orchestral_ambience",
+            base_azimuth_deg=0.0, azimuth_spread_deg=70.0,
+            base_elevation_deg=60.0, elevation_range_deg=25.0,
+            base_distance=0.82,
+            default_spread=0.32,
+            motion_archetype="orbit",
+            energy_sensitivity=0.15, flux_sensitivity=0.10, brightness_sensitivity=0.18,
+            source_citation="[DATA-SHEET] RalphSutton.com (2023): Orchestral string ambient"
+        )
+
+        # Load and integrate additional profiles from data sheets dynamically
+        try:
+            sheets = load_spf_data_sheets()
+            for entry in sheets:
+                # Skip entries we've already defined manually
+                instrument_key = (entry.get("instrument", entry.get("instrument_category", "")).lower().replace("-", "_"),
+                                entry.get("role", "unknown").lower().replace("-", "_"))
+                
+                if instrument_key not in self.instrument_profiles:
+                    profile = create_sheet_based_profile(entry)
+                    if profile:
+                        self.instrument_profiles[instrument_key] = profile
+        except Exception as e:
+            # Non-fatal: data sheets are optional enhancements
+            pass
 
         # -- fallback "other" / "unknown" -- mid-field, static
         self.instrument_profiles[("other", "unknown")] = InstrumentProfile(
