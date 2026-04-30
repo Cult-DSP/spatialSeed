@@ -62,6 +62,7 @@ streamlit run ui/app.py
 ```
 
 The UI provides:
+
 - Interactive 2D Seed Matrix control (u, v sliders)
 - Stem discovery and classification review
 - Per-stem category/role overrides
@@ -169,6 +170,7 @@ See `config/defaults.json` for default settings. Key parameters:
 **Version 0.2.0** - Core pipeline operational with MIR-driven enhancements
 
 **Pipeline stages** (all stages 0-9A complete):
+
 - [DONE] Session + Discovery (stage 0)
 - [DONE] Normalize Audio (stage 1)
 - [DONE] MIR Extraction (stage 2)
@@ -182,6 +184,7 @@ See `config/defaults.json` for default settings. Key parameters:
 - [DONE] Optional ADM/BW64 Export (stage 9A)
 
 **Recent enhancements** (Phase 8, April 2026):
+
 - [DONE] **Priority 1**: Context-aware profile selection (genre/energy/density modulation)
 - [DONE] **Priority 2**: Frequency-elevation coupling (spectral_centroid-based constraints)
 - [DONE] **Priority 5**: MIR tier 2 modulation (energy/flux/brightness → spread/motion_intensity)
@@ -190,6 +193,7 @@ See `config/defaults.json` for default settings. Key parameters:
 - [TODO] **Priority 6**: Multi-stem validation framework
 
 **UI and tooling:**
+
 - [DONE] Streamlit UI with Seed Matrix 2D control
 - [DONE] Command-line interface with full pipeline
 - [DONE] LUSID package generation (drop-in for Spatial Root)
