@@ -1077,3 +1077,45 @@ def compute_rms_db(audio: np.ndarray) -> float:
 
 - Upmixing improvements roadmap: See top of `src/spatial/spf.py` for detailed priority breakdown
 - Gesture engine future: `SPF_GESTURE_V3_ROADMAP.md` (Part 2: Enhanced MIR Integration, Part 3: Parametric Motion Classes)
+
+---
+
+### 2026-05-08 -- Placement Engine expansion (Stage 6 v2)
+
+**What was done:**
+
+All high-value and smaller placement improvements implemented in `src/spatial/placement.py`:
+
+**High-value:**
+
+- **Stereo pair cohesion**: `build_stereo_pairs(manifest)` extracts L/R pairs from session
+  manifest. `apply_stereo_pair_cohesion()` enforces shared Y/Z and minimum X separation
+  (0.15) for each pair. Wired through `pipeline.py`.
+- **Scene centroid normalization**: `apply_scene_centroid_normalization()` shifts the full
+  placement set 50% of the way toward `(0, 0.4, 0)` after all other passes, preventing
+  global drift toward rear or off-center positions.
+- **Adaptive depth via MIR loudness/brightness**: `compute_mir_depth_bias()` reads
+  `rms_energy` (dB) and `spectral_centroid_mean` (Hz) from `mir_summary` to produce a Y
+  bias in `[-0.12, +0.12]`. Loud/bright sources move forward; soft/dark move rearward.
+  Applied per-object in `compute_placement()`.
+- **Category-specific front bias curves**: `category_front_bias` dict applies additive Y
+  offsets after the global front/back transform. Vocals/keys push forward; fx/ambience push
+  rearward. Applied as `apply_category_front_curve()`.
+- **Dynamic spacing threshold**: `_dynamic_min_distance(n, cohesion)` scales `min_distance`
+  with object count and ensemble cohesion. Range approximately 0.08 (small scene) to 0.15
+  (large/dense scene).
+
+**Smaller improvements:**
+
+- **Clamp severity reporting**: `_report_clamp_severity()` warns if >= 3 positions are
+  clamped, and emits per-event WARNING for any axis clamped by > 0.3 units.
+- **Placement audit metrics**: `write_placement_audit()` writes `work/placement_audit.json`
+  with min/max/mean XYZ, crowded pair count, and total clamped count after each run.
+
+**pipeline.py updated:**
+- Stage 6 call now passes `mir_summary`, `manifest`, and `work_dir` to `compute_all_placements`.
+
+**PLACEMENT.md updated** with full documentation of all new features, pipeline steps, tuning
+constants, and audit format.
+
+**No new dependencies required.**

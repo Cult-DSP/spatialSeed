@@ -158,7 +158,12 @@ class SpatialSeedPipeline:
         
         # Stage 6: Static Placement
         placement_engine = PlacementEngine()
-        placements = placement_engine.compute_all_placements(profiles, style_vector)
+        placements = placement_engine.compute_all_placements(
+            profiles, style_vector,
+            mir_summary=mir_summary,
+            manifest=manifest,
+            work_dir=str(self.work_dir),
+        )
         
         # Stage 7: Gesture Generation
         duration = manifest.get("max_duration_seconds", 300.0)
