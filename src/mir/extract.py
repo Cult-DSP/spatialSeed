@@ -115,7 +115,11 @@ class MIRExtractor:
         max_onset_strength = float(np.max(oenv))
 
         # -- Tempo (BPM) ---------------------------------------------------
-        tempo, _ = librosa.beat.beat_track(onset_envelope=oenv, sr=sr)
+        # Use librosa.beat.tempo for stability (beat_track can segfault)
+        try:
+            tempo = librosa.feature.rhythm.tempo(onset_envelope=oenv, sr=sr)
+        except AttributeError:
+            tempo = librosa.beat.tempo(onset_envelope=oenv, sr=sr)
         tempo_bpm = float(tempo[0]) if isinstance(tempo, np.ndarray) else float(tempo)
 
         # -- Pitch confidence (via piptrack) -------------------------------
@@ -274,29 +278,68 @@ class MIRExtractor:
                     "stem_hash": stem_hash,
                 })
 
-        num_workers = max(1, multiprocessing.cpu_count() - 1)
-        logger.info(f"  Dispatching {len(tasks)} tasks across {num_workers} workers...")
-        
-        extracted_count = 0
-        with ProcessPoolExecutor(max_workers=num_workers) as executor:
-            # Map futures to tasks preserving our metadata
-            future_to_task = {
-                executor.submit(self.extract_stem_features, t["wav_path"], t["stem_hash"]): t 
-                for t in tasks
-            }
-            
-            for future in as_completed(future_to_task):
-                t = future_to_task[future]
+        def extract_sequential():
+            extracted = 0
+            for t in tasks:
                 try:
-                    features = future.result()
+                    features = self.extract_stem_features(t["wav_path"], t["stem_hash"])
                     mir_summary["stems"][t["node_id"]] = {
                         "filename": t["stem_name"],
                         "features": features,
                     }
-                    extracted_count += 1
-                    logger.info(f"  Extracted features for {t['node_id']} ({t['stem_name']}) [{extracted_count}/{len(tasks)}]")
+                    extracted += 1
+                    logger.info(
+                        "  Extracted features for %s (%s) [%d/%d]",
+                        t["node_id"],
+                        t["stem_name"],
+                        extracted,
+                        len(tasks),
+                    )
                 except Exception as exc:
-                    logger.error(f"  Error extracting features for {t['wav_path']}: {exc}")
+                    logger.error("  Error extracting features for %s: %s", t["wav_path"], exc)
+            return extracted
+
+        num_workers = max(1, multiprocessing.cpu_count() - 1)
+        num_workers = min(num_workers, 4)
+        logger.info("  Dispatching %d tasks across %d workers...", len(tasks), num_workers)
+
+        extracted_count = 0
+        had_parallel_failure = False
+        if num_workers > 1:
+            try:
+                ctx = multiprocessing.get_context("spawn")
+                with ProcessPoolExecutor(max_workers=num_workers, mp_context=ctx) as executor:
+                    future_to_task = {
+                        executor.submit(self.extract_stem_features, t["wav_path"], t["stem_hash"]): t
+                        for t in tasks
+                    }
+
+                    for future in as_completed(future_to_task):
+                        t = future_to_task[future]
+                        try:
+                            features = future.result()
+                            mir_summary["stems"][t["node_id"]] = {
+                                "filename": t["stem_name"],
+                                "features": features,
+                            }
+                            extracted_count += 1
+                            logger.info(
+                                "  Extracted features for %s (%s) [%d/%d]",
+                                t["node_id"],
+                                t["stem_name"],
+                                extracted_count,
+                                len(tasks),
+                            )
+                        except Exception as exc:
+                            had_parallel_failure = True
+                            logger.error("  Error extracting features for %s: %s", t["wav_path"], exc)
+            except Exception as exc:
+                had_parallel_failure = True
+                logger.error("  MIR multiprocessing failed, falling back to sequential: %s", exc)
+
+        if extracted_count == 0 or had_parallel_failure:
+            logger.warning("  Falling back to sequential MIR extraction")
+            extracted_count = extract_sequential()
 
         total_time = time.time() - t0
         files_sec = len(tasks) / total_time if total_time > 0 else 0

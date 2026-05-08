@@ -1,8 +1,8 @@
 {
-  "reportVersion": "0.1",
+  "reportVersion": "1.0",
   "tool": {
     "name": "cult-transcoder",
-    "version": "0.1.0",
+    "version": "1.0",
     "gitCommit": "a31d55c"
   },
   "args": {
@@ -15,9 +15,7 @@
     "lfeMode": "hardcoded"
   },
   "status": "fail",
-  "errors": [
-    "Unsupported --in-format: 'lusid_json'. Supported: adm_xml"
-  ],
+  "errors": ["Unsupported --in-format: 'lusid_json'. Supported: adm_xml"],
   "warnings": [],
   "summary": {
     "durationSec": 0,

@@ -35,6 +35,20 @@ class PlacementEngine:
         self.clamp_log: List[Dict] = []
 
     # ------------------------------------------------------------------
+    # Style vector helpers
+    # ------------------------------------------------------------------
+
+    @staticmethod
+    def _safe_z(style_vector: np.ndarray, index: int, default: float = 0.0) -> float:
+        """Safely read a style vector index with fallback."""
+        try:
+            if style_vector is None or len(style_vector) <= index:
+                return default
+            return float(style_vector[index])
+        except Exception:
+            return default
+
+    # ------------------------------------------------------------------
     # Constraint helpers
     # ------------------------------------------------------------------
 
@@ -58,6 +72,27 @@ class PlacementEngine:
             return 0.0
         return z * height_usage
 
+    @staticmethod
+    def apply_spread_and_cohesion(x: float, y: float,
+                                  placement_spread: float,
+                                  ensemble_cohesion: float,
+                                  symmetry_bias: float) -> Tuple[float, float]:
+        """
+        Apply spread, cohesion, and symmetry bias to X/Y.
+
+        placement_spread: more spread with higher values (wider field)
+        ensemble_cohesion: higher values pull positions toward center
+        symmetry_bias: higher values reduce lateral asymmetry (conservative)
+        """
+        spread_factor = 0.7 + 0.6 * placement_spread      # [0.7, 1.3]
+        cohesion_factor = 1.0 - 0.4 * ensemble_cohesion   # [0.6, 1.0]
+        symmetry_factor = 1.0 - 0.35 * symmetry_bias      # [0.65, 1.0]
+
+        x_scaled = x * spread_factor * cohesion_factor * symmetry_factor
+        y_scaled = y * spread_factor * cohesion_factor
+
+        return x_scaled, y_scaled
+
     # ------------------------------------------------------------------
     # Single placement
     # ------------------------------------------------------------------
@@ -76,11 +111,20 @@ class PlacementEngine:
         2. Apply front-back bias and height scaling from style vector.
         3. Clamp to cube.
         """
-        height_usage    = float(style_vector[1])
-        front_back_bias = float(style_vector[5])
+        placement_spread = self._safe_z(style_vector, 0, 0.5)
+        height_usage = self._safe_z(style_vector, 1, 0.5)
+        symmetry_bias = self._safe_z(style_vector, 4, 0.5)
+        front_back_bias = self._safe_z(style_vector, 5, 0.5)
+        ensemble_cohesion = self._safe_z(style_vector, 6, 0.5)
 
-        x = profile.base_x
-        y = self.apply_front_back_bias(profile.base_y, front_back_bias)
+        x, y = self.apply_spread_and_cohesion(
+            profile.base_x,
+            profile.base_y,
+            placement_spread=placement_spread,
+            ensemble_cohesion=ensemble_cohesion,
+            symmetry_bias=symmetry_bias,
+        )
+        y = self.apply_front_back_bias(y, front_back_bias)
         z = self.apply_height_constraint(profile.base_z, height_usage, no_height)
 
         # Clamp
