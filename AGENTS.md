@@ -77,7 +77,7 @@ repo root so that `from src.* import ...` resolves correctly.
 - [DONE] Organize files in src to be in appropriate subfolders
 - [DONE] SPF reference research data -- loaded spatial reference JSON sheets and mapped spf.py default profiles to cited industry sources (MusicGuyMixing, ProAudioFiles, DrumAudioEditing, etc.)
 - [DONE] Expand SPF profile coverage -- extended spf.py profiles to include backing vocals, percussion, lead keys, lead strings, brass, woodwinds, choir, and sound design.
-- [DONE] LUSID schema validation -- lusid_writer.py validates against LUSID/schema/lusid_scene_v0.5.schema.json using jsonschema.
+- [DONE] LUSID schema validation -- lusid_writer.py validates against LUSID/schema/lusid_scene_v1.0.schema.json using jsonschema.
 - [DONE] MIR extraction speedup -- Optimized librosa STFT reuse, switched audio loading to soundfile, and wrapped the loop in ProcessPoolExecutor for concurrent batching.
 - [TODO] Spatial Root renderer smoke test -- requires loading LUSID package into Spatial Root to verify object positions, delta frames, LFE recognition.
 - [DONE] Unit tests per module -- Only `seed_matrix` and `spf` tests are written but using python's built-in `unittest`. Moved writing remainder of unit tests to the end of the roadmap.
@@ -86,10 +86,11 @@ repo root so that `from src.* import ...` resolves correctly.
 - [DONE] UI Polish -- Altair 2D Seed Matrix canvas injected and polished.
 - [DONE] **Deep MIR Analysis** -- Expanded `mir/extract.py` with advanced rhythm and timbral analysis (MFCCs, tonnetz, tempo, spectral contrast) and updated heuristics.
 - [DONE] **Downstream MIR Integration** -- Wire the newly extracted features (like `tempo_bpm`) into `gesture_engine.py` to drive tempo-synced spatial motion.
+- [DONE] **ADM/BW64 Export** -- Fully integrated via `cult-transcoder` bridge.
 
 ---
 
-### Phase 7: Advanced MIR & Analysis (CURRENT FOCUS)
+### Phase 7: Advanced MIR & Analysis (DONE)
 
 **Goal:** Deepen the audio analysis capabilities to drive smarter, tempo-synced spatialization.
 
@@ -103,6 +104,14 @@ repo root so that `from src.* import ...` resolves correctly.
 
 21. **src/gesture_engine.py** - [DONE] Wire features to downstream motion
     - Consume `tempo_bpm` to sync orbital motion periods to the track's musical grid.
+
+### Phase 8: Stabilization & Release Lock (CURRENT FOCUS)
+
+**Goal:** Finalize repository state for packaging.
+
+22. **Final Pass** - [DONE] Verify repaired files, determinism, and repo cleanliness.
+23. **Validation** - [DONE] Run full E2E smoke test (stages 0-9).
+24. **Readiness** - [DONE] Prepare packaging report.
 
 ## 1) Project mission (in one paragraph)
 
