@@ -150,8 +150,8 @@ class LUSIDSceneWriter:
 
         frames = self.assemble_frames(keyframes_dict)
 
-        scene: Dict = {
-            "version": "0.5",
+        scene = {
+            "version": "1.0",
             "sampleRate": self.sample_rate,
             "timeUnit": "seconds",
             "frames": frames,
@@ -208,8 +208,8 @@ class LUSIDSceneWriter:
         for key in ("version", "frames"):
             if key not in scene:
                 errors.append(f"Missing top-level key '{key}'")
-        if scene.get("version") != "0.5":
-            errors.append(f"Expected version '0.5', got '{scene.get('version')}'")
+        if scene.get("version") != "1.0":
+            errors.append(f"Expected version '1.0', got '{scene.get('version')}'")
 
         frames = scene.get("frames", [])
         if not frames:

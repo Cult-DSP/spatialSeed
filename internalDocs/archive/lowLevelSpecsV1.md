@@ -237,7 +237,7 @@ Example excerpt:
 
 ---
 
-## 8. SonoPleth integration note
+## 8. Spatial Root integration note
 
 Add a Spatial Root entrypoint:
 

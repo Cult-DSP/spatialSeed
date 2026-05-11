@@ -42,7 +42,7 @@ from src.spatial.placement import PlacementEngine
 from src.spatial.gesture_engine import GestureEngine
 from src.export.lusid_writer import LUSIDSceneWriter
 from src.export.lusid_package import LUSIDPackageExporter
-from src.export.adm_bw64 import ADMBw64Exporter
+from src.export.cult_bridge import export_adm_bw64
 
 # ---------------------------------------------------------------------------
 STEMS_DIR = REPO_ROOT / "test_session" / "stems"
@@ -218,7 +218,7 @@ def run_stage_8(keyframes):
     frames = scene["frames"]
     assert len(frames) > 0, "No frames in scene"
     assert frames[0]["time"] == 0.0, "First frame not at t=0"
-    assert scene["version"] == "0.5"
+    assert scene["version"] == "1.0"
     assert scene["sampleRate"] == 48000
 
     # Count node types at t=0
@@ -319,21 +319,13 @@ def run_stage_9b(manifest):
     adm_path = EXPORT_DIR / "export.adm.wav"
     xml_path = EXPORT_DIR / "export.adm.xml"
 
-    exporter = ADMBw64Exporter()
-    result = exporter.export_adm_bw64(
+    success = export_adm_bw64(
         lusid_package_dir=str(pkg_dir),
-        manifest=manifest,
-        output_path=str(adm_path),
-        sidecar_xml=True,
+        out_wav_path=str(adm_path),
+        out_xml_path=str(xml_path)
     )
 
-    # Validate
-    errors = exporter.validate_bw64(str(adm_path))
-    if errors:
-        for e in errors:
-            print(f"  ERROR: {e}")
-        assert False, f"ADM validation failed: {errors}"
-
+    assert success, "CULT Transcoder ADM export failed"
     assert adm_path.exists(), "ADM WAV not created"
     assert xml_path.exists(), "Sidecar XML not created"
 
@@ -353,9 +345,8 @@ def run_stage_9b(manifest):
     assert "ebuCoreMain" in root.tag, f"Unexpected XML root: {root.tag}"
 
     dt = time.perf_counter() - t0
-    print(f"\n  [OK] ADM export: {result['channels']} ch, "
-          f"{result['duration_seconds']}s, {result['size_mb']} MB  ({dt:.1f}s)")
-    return result
+    print(f"\n  [OK] ADM export via CULT Transcoder  ({dt:.1f}s)")
+    return {"success": success}
 
 
 # === Summary ==============================================================
@@ -384,8 +375,7 @@ def print_summary(manifest, classifications, profiles, placements, keyframes,
     print(f"  Scene: {len(scene['frames'])} frames, version {scene['version']}")
     print(f"  Package: {contains['total_channels']} channels, "
           f"{sum(1 for c in contains['channels'] if c['contains_audio'])} active")
-    print(f"  ADM: {adm_result['channels']} ch, {adm_result['duration_seconds']}s, "
-          f"{adm_result['size_mb']} MB")
+    print(f"  ADM: Export success={adm_result['success']}")
 
     print("\n" + "=" * 60)
     print("All stages 0-9 passed.")

@@ -181,7 +181,7 @@ class SpatialSeedPipeline:
         scene = lusid_writer.write_scene(keyframes, str(scene_path))
         
         # Validate scene
-        schema_path = Path(__file__).resolve().parent.parent / "LUSID" / "schema" / "lusid_scene_v0.5.schema.json"
+        schema_path = Path(__file__).resolve().parent.parent / "LUSID" / "SCHEMA" / "lusid_scene_v1.0.schema.json"
         
         # pass schema path if it exists, otherwise LUSIDSceneWriter falls back to structural only
         scene_errors = lusid_writer.validate_scene(
@@ -219,23 +219,19 @@ class SpatialSeedPipeline:
         
         # Export B: ADM/BW64 (optional)
         if export_adm:
-            adm_exporter = ADMBw64Exporter()
-            
             adm_output_path = self.export_dir / "export.adm.wav"
-            adm_result = adm_exporter.export_adm_bw64(
+            adm_xml_path = self.export_dir / "export.adm.xml"
+            
+            success = export_adm_bw64(
                 lusid_package_dir=str(lusid_package_dir),
-                manifest=manifest,
-                output_path=str(adm_output_path),
-                sidecar_xml=True,
+                out_wav_path=str(adm_output_path),
+                out_xml_path=str(adm_xml_path)
             )
             
-            # Validate
-            adm_errors = adm_exporter.validate_bw64(str(adm_output_path))
-            if adm_errors:
-                for err in adm_errors:
-                    logger.info(f"  WARN: {err}")
+            if not success:
+                logger.info("  WARN: ADM/BW64 export failed")
             else:
-                logger.info("  ADM/BW64 validated OK")
+                logger.info("  ADM/BW64 exported OK")
         
         logger.info("=" * 60)
         logger.info("Pipeline complete")
@@ -266,6 +262,7 @@ class SpatialSeedPipeline:
             "lusid_package": str(lusid_package_dir),
             "keyframe_stats": stats,
             "scene_info": scene_info,
+            "placements": placements,
         }
 
 
@@ -307,6 +304,14 @@ def main():
     # Save results
     results_path = Path(args.project_dir) / "export" / "results.json"
     with open(results_path, 'w') as f:
+        json.dump(results, f, indent=2)
+    
+    logger.info(f"\nResults saved to {results_path}")
+
+
+if __name__ == "__main__":
+    main()
+) as f:
         json.dump(results, f, indent=2)
     
     logger.info(f"\nResults saved to {results_path}")

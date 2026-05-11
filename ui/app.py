@@ -116,13 +116,23 @@ def _render_sidebar():
         # Project Settings Panel
         st.markdown('<div class="section-header">Project Settings</div>', unsafe_allow_html=True)
 
-        project_dir = st.text_input(
-            "Project Directory",
+        base_dir = st.text_input(
+            "Base Output Directory",
             value=str(_REPO_ROOT / "test_session"),
-            help="Root directory for session work/cache/export folders",
+            help="Root directory for sessions",
             label_visibility="collapsed"
         )
-        st.caption("Project Directory")
+        st.caption("Base Output Directory")
+
+        session_name = st.text_input(
+            "Session Name",
+            value="my_session",
+            help="Name of this specific session",
+            label_visibility="collapsed"
+        )
+        st.caption("Session Name")
+        
+        project_dir = str(Path(base_dir) / session_name)
 
         stems_dir = st.text_input(
             "Stems Directory",
@@ -879,6 +889,35 @@ def main():
 
     with tab_results:
         _render_results_tab()
+
+
+if __name__ == "__main__":
+    main()
+("SpatialSeed")
+        st.caption("Immersive Spatial Scene Authoring — LUSID-first pipeline")
+    with col_status:
+        status = "READY" if not st.session_state.get("pipeline_running", False) else "GENERATING"
+        status_class = "ready" if status == "READY" else "generating"
+        st.markdown(f'<div class="status-pill {status_class}">{status}</div>', unsafe_allow_html=True)
+
+    project_dir, stems_dir, u, v = _render_sidebar()
+
+    # Main tabs with updated styling
+    tab_gen, tab_stems, tab_results = st.tabs(["Generate", "Stems", "Results"])
+
+    with tab_gen:
+        _render_generate_tab(project_dir, stems_dir, u, v)
+
+    with tab_stems:
+        _render_stems_tab()
+
+    with tab_results:
+        _render_results_tab()
+
+
+if __name__ == "__main__":
+    main()
+s_tab()
 
 
 if __name__ == "__main__":

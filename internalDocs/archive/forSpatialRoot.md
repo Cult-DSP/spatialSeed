@@ -1,4 +1,4 @@
-# forSonoPleth.md — Agent spec for Spatial Root ingestion of SpatialSeed LUSID packages
+# forSpatialRoot.md — Agent spec for Spatial Root ingestion of SpatialSeed LUSID packages
 
 ## Purpose
 

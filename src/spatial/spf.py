@@ -1427,18 +1427,15 @@ class SPFResolver:
         # ========== PRIORITY 5: MIR TIER 2 MODULATION ==========
         # Pre-compute global MIR statistics for spread/motion intensity modulation
         
-        energy_values = []
         flux_values = []
         brightness_values = []
         
         for stem_data in mir_summary.get("stems", {}).values():
             features = stem_data.get("features", {})
-            energy_values.append(features.get("rms_energy", 0.0))
             flux_values.append(features.get("spectral_flux_mean", 0.0))
             brightness_values.append(features.get("spectral_centroid_mean", 2000.0))
         
         # Compute percentiles for normalization
-        energy_p50 = np.median(energy_values) if energy_values else 0.5
         flux_p50 = np.median(flux_values) if flux_values else 0.5
         brightness_p50 = np.median(brightness_values) if brightness_values else 2000.0
 
@@ -1448,7 +1445,8 @@ class SPFResolver:
             side = stereo_map.get(node_id)
 
             # Extract MIR features for modulation
-            energy_norm = min(1.0, mir_features.get("rms_energy", 0.0) / max(energy_p50, 0.01))
+            rms_db = mir_features.get("rms_energy", -60.0)
+            energy_norm = max(0.0, min(1.0, (rms_db + 60.0) / 60.0))
             flux_norm = min(1.0, mir_features.get("spectral_flux_mean", 0.0) / max(flux_p50, 0.01))
             brightness_norm = mir_features.get("spectral_centroid_mean", 2000.0) / 20000.0  # [0, 1]
             
