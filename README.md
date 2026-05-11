@@ -61,6 +61,7 @@ streamlit run ui/app.py
 The documentation has been consolidated into the `docs/` directory:
 
 - [Architecture](docs/ARCHITECTURE.md) - Pipeline stages and components.
+- [MIR & Classification](docs/CLASSIFICATION.md) - How audio is analyzed and categorized.
 - [Workflows](docs/WORKFLOW.md) - Using the CLI and GUI.
 - [Exports](docs/EXPORTS.md) - Details on LUSID Package and ADM BWF generation.
 - [Placement Engine](docs/PLACEMENT_ENGINE.md) - How Seed Matrix, SPF, Placement, and Gestures work.
