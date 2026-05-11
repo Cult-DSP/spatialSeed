@@ -19,6 +19,7 @@ Data Sheet Integration (v2.1):
 import math
 import numpy as np
 import json
+import zlib
 from typing import Dict, List, Optional, Tuple
 from dataclasses import dataclass, asdict, field
 from pathlib import Path
@@ -1321,7 +1322,7 @@ class SPFResolver:
         else:
             # Single object: apply small deterministic offset based on node_id hash
             # to avoid all objects stacking at the same azimuth
-            nid_hash = hash(node_id) % 1000 / 1000.0  # [0, 1)
+            nid_hash = (zlib.adler32(node_id.encode()) & 0xffffffff) % 1000 / 1000.0  # [0, 1)
             az_deg = az_deg + az_spread * (nid_hash - 0.5)
 
         # ----- Elevation -----

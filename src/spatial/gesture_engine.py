@@ -14,6 +14,7 @@ Per spec: lowLevelSpecsV1.md 0, 3.2, agents.md 8
 
 import math
 import numpy as np
+import zlib
 from typing import Dict, List, Tuple, Optional
 from dataclasses import dataclass
 
@@ -92,7 +93,7 @@ class GestureEngine:
         period = max(4.0, 16.0 * (1.0 - intensity))
 
         # Deterministic phase offset per node
-        phase = (hash(node_id) % 1000) / 1000.0 * 2.0 * math.pi
+        phase = ((zlib.adler32(node_id.encode()) & 0xffffffff) % 1000) / 1000.0 * 2.0 * math.pi
 
         keyframes: List[Keyframe] = []
         # Sample interval: one keyframe every ~2-4 seconds
@@ -150,7 +151,7 @@ class GestureEngine:
             period = max(6.0, 16.0 * (1.0 - intensity))
 
         # Phase offset per node
-        phase = (hash(node_id) % 1000) / 1000.0 * 2.0 * math.pi
+        phase = ((zlib.adler32(node_id.encode()) & 0xffffffff) % 1000) / 1000.0 * 2.0 * math.pi
 
         # Elliptical: X-radius = radius, Y-radius = radius * 0.6
         ry = radius * 0.6
@@ -200,7 +201,7 @@ class GestureEngine:
         jitter = 0.03 + 0.12 * intensity + energy_coup * 0.05
 
         # Deterministic RNG per node
-        rng = np.random.RandomState(hash(node_id) % (2**31))
+        rng = np.random.RandomState((zlib.adler32(node_id.encode()) & 0xffffffff) % (2**31))
 
         keyframes: List[Keyframe] = []
         # Always start at base

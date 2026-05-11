@@ -1,0 +1,813 @@
+{
+  "version": "0.1.0",
+  "created_at": "2026-05-11T02:56:22.978356+00:00",
+  "sample_rate": 48000,
+  "max_duration_seconds": 97.99362811791383,
+  "stems_dir": "/Users/lucian/projects/spatialSeed/test_session/stems",
+  "stem_count": 35,
+  "object_count": 69,
+  "stems": [
+    {
+      "filename": "00_mono_vox.wav",
+      "path": "/Users/lucian/projects/spatialSeed/test_session/stems/00_mono_vox.wav",
+      "hash": "e328649c9e5b3c658f37c61aa3a17ae5f4fe823462f951f374d5e36cdaf40dc9",
+      "sample_rate": 44100,
+      "channels": 1,
+      "frames": 4321519,
+      "duration_seconds": 97.99362811791383,
+      "format": "WAV",
+      "subtype": "PCM_16",
+      "group_ids": [
+        11
+      ],
+      "wav_names": [
+        "11.1.wav"
+      ],
+      "node_ids": [
+        "11.1"
+      ]
+    },
+    {
+      "filename": "01_scatter outro_WetStem.wav",
+      "path": "/Users/lucian/projects/spatialSeed/test_session/stems/01_scatter outro_WetStem.wav",
+      "hash": "86632822b42a4ab53e4ac0da545256cca644bb971f4d6ca51cc1863bdbc43738",
+      "sample_rate": 44100,
+      "channels": 2,
+      "frames": 4321519,
+      "duration_seconds": 97.99362811791383,
+      "format": "WAV",
+      "subtype": "PCM_24",
+      "group_ids": [
+        12,
+        13
+      ],
+      "wav_names": [
+        "12.1.wav",
+        "13.1.wav"
+      ],
+      "node_ids": [
+        "12.1",
+        "13.1"
+      ]
+    },
+    {
+      "filename": "02_ac_WetStem.wav",
+      "path": "/Users/lucian/projects/spatialSeed/test_session/stems/02_ac_WetStem.wav",
+      "hash": "24062091a461e3de5257f749be146547c956168df802a51c33fb5c980bcbdfb7",
+      "sample_rate": 44100,
+      "channels": 2,
+      "frames": 4321519,
+      "duration_seconds": 97.99362811791383,
+      "format": "WAV",
+      "subtype": "PCM_24",
+      "group_ids": [
+        14,
+        15
+      ],
+      "wav_names": [
+        "14.1.wav",
+        "15.1.wav"
+      ],
+      "node_ids": [
+        "14.1",
+        "15.1"
+      ]
+    },
+    {
+      "filename": "03_eq rev_WetStem.wav",
+      "path": "/Users/lucian/projects/spatialSeed/test_session/stems/03_eq rev_WetStem.wav",
+      "hash": "0930c9a26a6ac2325c747c66bd52bb01d7eb7f75b69e2b6aecf8f2d584b6527d",
+      "sample_rate": 44100,
+      "channels": 2,
+      "frames": 4321519,
+      "duration_seconds": 97.99362811791383,
+      "format": "WAV",
+      "subtype": "PCM_24",
+      "group_ids": [
+        16,
+        17
+      ],
+      "wav_names": [
+        "16.1.wav",
+        "17.1.wav"
+      ],
+      "node_ids": [
+        "16.1",
+        "17.1"
+      ]
+    },
+    {
+      "filename": "04_effect intro_WetStem.wav",
+      "path": "/Users/lucian/projects/spatialSeed/test_session/stems/04_effect intro_WetStem.wav",
+      "hash": "12a410ecc8b62c66c5f0d26f9313b26f187f3259f8912287a8a27b4642fbf372",
+      "sample_rate": 44100,
+      "channels": 2,
+      "frames": 4321519,
+      "duration_seconds": 97.99362811791383,
+      "format": "WAV",
+      "subtype": "PCM_24",
+      "group_ids": [
+        18,
+        19
+      ],
+      "wav_names": [
+        "18.1.wav",
+        "19.1.wav"
+      ],
+      "node_ids": [
+        "18.1",
+        "19.1"
+      ]
+    },
+    {
+      "filename": "05_sm effects_WetStem.wav",
+      "path": "/Users/lucian/projects/spatialSeed/test_session/stems/05_sm effects_WetStem.wav",
+      "hash": "33d1a50bbed900dcad512a4687b32a39d9a520dc0113f7aa48054fa83601200c",
+      "sample_rate": 44100,
+      "channels": 2,
+      "frames": 4321519,
+      "duration_seconds": 97.99362811791383,
+      "format": "WAV",
+      "subtype": "PCM_24",
+      "group_ids": [
+        20,
+        21
+      ],
+      "wav_names": [
+        "20.1.wav",
+        "21.1.wav"
+      ],
+      "node_ids": [
+        "20.1",
+        "21.1"
+      ]
+    },
+    {
+      "filename": "06_se effects_WetStem.wav",
+      "path": "/Users/lucian/projects/spatialSeed/test_session/stems/06_se effects_WetStem.wav",
+      "hash": "584c3f36f301085f28f58e09b1524621f62b3a7f01a369729a300308006bc449",
+      "sample_rate": 44100,
+      "channels": 2,
+      "frames": 4321519,
+      "duration_seconds": 97.99362811791383,
+      "format": "WAV",
+      "subtype": "PCM_24",
+      "group_ids": [
+        22,
+        23
+      ],
+      "wav_names": [
+        "22.1.wav",
+        "23.1.wav"
+      ],
+      "node_ids": [
+        "22.1",
+        "23.1"
+      ]
+    },
+    {
+      "filename": "07_Acoustic_WetStem.wav",
+      "path": "/Users/lucian/projects/spatialSeed/test_session/stems/07_Acoustic_WetStem.wav",
+      "hash": "9b0848d47e567d3570b7bcc29474f0db3261e4d2af37e6e3f614bfb9cf42dd8e",
+      "sample_rate": 44100,
+      "channels": 2,
+      "frames": 4321519,
+      "duration_seconds": 97.99362811791383,
+      "format": "WAV",
+      "subtype": "PCM_24",
+      "group_ids": [
+        24,
+        25
+      ],
+      "wav_names": [
+        "24.1.wav",
+        "25.1.wav"
+      ],
+      "node_ids": [
+        "24.1",
+        "25.1"
+      ]
+    },
+    {
+      "filename": "08_se 1_WetStem.wav",
+      "path": "/Users/lucian/projects/spatialSeed/test_session/stems/08_se 1_WetStem.wav",
+      "hash": "8e189f642371e6ece6e198f0f14e57d91d42ba0e663ea49f1d0bd5cc9194a8e1",
+      "sample_rate": 44100,
+      "channels": 2,
+      "frames": 4321519,
+      "duration_seconds": 97.99362811791383,
+      "format": "WAV",
+      "subtype": "PCM_24",
+      "group_ids": [
+        26,
+        27
+      ],
+      "wav_names": [
+        "26.1.wav",
+        "27.1.wav"
+      ],
+      "node_ids": [
+        "26.1",
+        "27.1"
+      ]
+    },
+    {
+      "filename": "09_Sm 1_WetStem.wav",
+      "path": "/Users/lucian/projects/spatialSeed/test_session/stems/09_Sm 1_WetStem.wav",
+      "hash": "b92f680515113efea0f147a70f8e1f9710d78dcbd3c552bbfef124dcd302204a",
+      "sample_rate": 44100,
+      "channels": 2,
+      "frames": 4321519,
+      "duration_seconds": 97.99362811791383,
+      "format": "WAV",
+      "subtype": "PCM_24",
+      "group_ids": [
+        28,
+        29
+      ],
+      "wav_names": [
+        "28.1.wav",
+        "29.1.wav"
+      ],
+      "node_ids": [
+        "28.1",
+        "29.1"
+      ]
+    },
+    {
+      "filename": "10_EG 1_WetStem.wav",
+      "path": "/Users/lucian/projects/spatialSeed/test_session/stems/10_EG 1_WetStem.wav",
+      "hash": "85e80841de9e012d094b529587744824c5e02d8e064c623fad7f548a3f9f572b",
+      "sample_rate": 44100,
+      "channels": 2,
+      "frames": 4321519,
+      "duration_seconds": 97.99362811791383,
+      "format": "WAV",
+      "subtype": "PCM_24",
+      "group_ids": [
+        30,
+        31
+      ],
+      "wav_names": [
+        "30.1.wav",
+        "31.1.wav"
+      ],
+      "node_ids": [
+        "30.1",
+        "31.1"
+      ]
+    },
+    {
+      "filename": "11_EG 1_WetStem.wav",
+      "path": "/Users/lucian/projects/spatialSeed/test_session/stems/11_EG 1_WetStem.wav",
+      "hash": "9803a6ef93a958ea1f95c7ad8a25a4fec71c826880b197d9da21096c7e79e8a4",
+      "sample_rate": 44100,
+      "channels": 2,
+      "frames": 4321519,
+      "duration_seconds": 97.99362811791383,
+      "format": "WAV",
+      "subtype": "PCM_24",
+      "group_ids": [
+        32,
+        33
+      ],
+      "wav_names": [
+        "32.1.wav",
+        "33.1.wav"
+      ],
+      "node_ids": [
+        "32.1",
+        "33.1"
+      ]
+    },
+    {
+      "filename": "12_EG 1 A_WetStem.wav",
+      "path": "/Users/lucian/projects/spatialSeed/test_session/stems/12_EG 1 A_WetStem.wav",
+      "hash": "0aebf7a029c5f1dbd08d7afb38ec692d22525c344bc28fb69e42e465dfe35d3e",
+      "sample_rate": 44100,
+      "channels": 2,
+      "frames": 4321519,
+      "duration_seconds": 97.99362811791383,
+      "format": "WAV",
+      "subtype": "PCM_24",
+      "group_ids": [
+        34,
+        35
+      ],
+      "wav_names": [
+        "34.1.wav",
+        "35.1.wav"
+      ],
+      "node_ids": [
+        "34.1",
+        "35.1"
+      ]
+    },
+    {
+      "filename": "13_Main Cello_WetStem.wav",
+      "path": "/Users/lucian/projects/spatialSeed/test_session/stems/13_Main Cello_WetStem.wav",
+      "hash": "4a99a9666d741e974b0a5498c680588c7a330ee93eb5c884f6f2996bb1c23ad7",
+      "sample_rate": 44100,
+      "channels": 2,
+      "frames": 4321519,
+      "duration_seconds": 97.99362811791383,
+      "format": "WAV",
+      "subtype": "PCM_24",
+      "group_ids": [
+        36,
+        37
+      ],
+      "wav_names": [
+        "36.1.wav",
+        "37.1.wav"
+      ],
+      "node_ids": [
+        "36.1",
+        "37.1"
+      ]
+    },
+    {
+      "filename": "14_luc vox 1_WetStem.wav",
+      "path": "/Users/lucian/projects/spatialSeed/test_session/stems/14_luc vox 1_WetStem.wav",
+      "hash": "b1a53295ea7894f32cdc93e8302858e8da84e2550536960709f1e49863af9a4b",
+      "sample_rate": 44100,
+      "channels": 2,
+      "frames": 4321519,
+      "duration_seconds": 97.99362811791383,
+      "format": "WAV",
+      "subtype": "PCM_24",
+      "group_ids": [
+        38,
+        39
+      ],
+      "wav_names": [
+        "38.1.wav",
+        "39.1.wav"
+      ],
+      "node_ids": [
+        "38.1",
+        "39.1"
+      ]
+    },
+    {
+      "filename": "15_Audio 2_WetStem.wav",
+      "path": "/Users/lucian/projects/spatialSeed/test_session/stems/15_Audio 2_WetStem.wav",
+      "hash": "8407febed4c2b7ce1cb1c9360abc0df9f665e3ef4ffea469176523a4d7e12138",
+      "sample_rate": 44100,
+      "channels": 2,
+      "frames": 4321519,
+      "duration_seconds": 97.99362811791383,
+      "format": "WAV",
+      "subtype": "PCM_24",
+      "group_ids": [
+        40,
+        41
+      ],
+      "wav_names": [
+        "40.1.wav",
+        "41.1.wav"
+      ],
+      "node_ids": [
+        "40.1",
+        "41.1"
+      ]
+    },
+    {
+      "filename": "16_Audio 5_WetStem.wav",
+      "path": "/Users/lucian/projects/spatialSeed/test_session/stems/16_Audio 5_WetStem.wav",
+      "hash": "2c1112d7b97aca7aec30f129b751241b68fb2babb54afeb9425406aed2ae485f",
+      "sample_rate": 44100,
+      "channels": 2,
+      "frames": 4321519,
+      "duration_seconds": 97.99362811791383,
+      "format": "WAV",
+      "subtype": "PCM_24",
+      "group_ids": [
+        42,
+        43
+      ],
+      "wav_names": [
+        "42.1.wav",
+        "43.1.wav"
+      ],
+      "node_ids": [
+        "42.1",
+        "43.1"
+      ]
+    },
+    {
+      "filename": "17_Audio 6_WetStem.wav",
+      "path": "/Users/lucian/projects/spatialSeed/test_session/stems/17_Audio 6_WetStem.wav",
+      "hash": "8ef363157aba6fb6efbf993f94a0603bcc76972bfc940d0b8bdcd89f3b8b407b",
+      "sample_rate": 44100,
+      "channels": 2,
+      "frames": 4321519,
+      "duration_seconds": 97.99362811791383,
+      "format": "WAV",
+      "subtype": "PCM_24",
+      "group_ids": [
+        44,
+        45
+      ],
+      "wav_names": [
+        "44.1.wav",
+        "45.1.wav"
+      ],
+      "node_ids": [
+        "44.1",
+        "45.1"
+      ]
+    },
+    {
+      "filename": "18_Audio 7_WetStem.wav",
+      "path": "/Users/lucian/projects/spatialSeed/test_session/stems/18_Audio 7_WetStem.wav",
+      "hash": "376a5c769781fedb4dfb680a8952cac9164bd3540c1b89dd165d1481be02c0b1",
+      "sample_rate": 44100,
+      "channels": 2,
+      "frames": 4321519,
+      "duration_seconds": 97.99362811791383,
+      "format": "WAV",
+      "subtype": "PCM_24",
+      "group_ids": [
+        46,
+        47
+      ],
+      "wav_names": [
+        "46.1.wav",
+        "47.1.wav"
+      ],
+      "node_ids": [
+        "46.1",
+        "47.1"
+      ]
+    },
+    {
+      "filename": "19_grain vox_WetStem.wav",
+      "path": "/Users/lucian/projects/spatialSeed/test_session/stems/19_grain vox_WetStem.wav",
+      "hash": "c76b4f8650590c8a89ff2b3f7fd1cd0b7f8ea0eca9a375efdda860118c18dd3c",
+      "sample_rate": 44100,
+      "channels": 2,
+      "frames": 4321519,
+      "duration_seconds": 97.99362811791383,
+      "format": "WAV",
+      "subtype": "PCM_24",
+      "group_ids": [
+        48,
+        49
+      ],
+      "wav_names": [
+        "48.1.wav",
+        "49.1.wav"
+      ],
+      "node_ids": [
+        "48.1",
+        "49.1"
+      ]
+    },
+    {
+      "filename": "20_Luc low_WetStem.wav",
+      "path": "/Users/lucian/projects/spatialSeed/test_session/stems/20_Luc low_WetStem.wav",
+      "hash": "79fac4d9c6fdb8a4cf3b6e98c97572802d441b0d56fc70e3d8aaa1eb9fa865df",
+      "sample_rate": 44100,
+      "channels": 2,
+      "frames": 4321519,
+      "duration_seconds": 97.99362811791383,
+      "format": "WAV",
+      "subtype": "PCM_24",
+      "group_ids": [
+        50,
+        51
+      ],
+      "wav_names": [
+        "50.1.wav",
+        "51.1.wav"
+      ],
+      "node_ids": [
+        "50.1",
+        "51.1"
+      ]
+    },
+    {
+      "filename": "21_Audio 13_WetStem.wav",
+      "path": "/Users/lucian/projects/spatialSeed/test_session/stems/21_Audio 13_WetStem.wav",
+      "hash": "6c5f762b4d0e64f71a458dd41b460b7db2b0e567f418b2d9c42a988c23497e31",
+      "sample_rate": 44100,
+      "channels": 2,
+      "frames": 4321519,
+      "duration_seconds": 97.99362811791383,
+      "format": "WAV",
+      "subtype": "PCM_24",
+      "group_ids": [
+        52,
+        53
+      ],
+      "wav_names": [
+        "52.1.wav",
+        "53.1.wav"
+      ],
+      "node_ids": [
+        "52.1",
+        "53.1"
+      ]
+    },
+    {
+      "filename": "22_Audio 18_WetStem.wav",
+      "path": "/Users/lucian/projects/spatialSeed/test_session/stems/22_Audio 18_WetStem.wav",
+      "hash": "538c5d2efeb8cd08014caf9f22d6a2eb5ba947317e84ae27929009a4dd197700",
+      "sample_rate": 44100,
+      "channels": 2,
+      "frames": 4321519,
+      "duration_seconds": 97.99362811791383,
+      "format": "WAV",
+      "subtype": "PCM_24",
+      "group_ids": [
+        54,
+        55
+      ],
+      "wav_names": [
+        "54.1.wav",
+        "55.1.wav"
+      ],
+      "node_ids": [
+        "54.1",
+        "55.1"
+      ]
+    },
+    {
+      "filename": "23_Audio 19_WetStem.wav",
+      "path": "/Users/lucian/projects/spatialSeed/test_session/stems/23_Audio 19_WetStem.wav",
+      "hash": "887e498a460ae81d0ccb883b36bba78b0a7661de534cbed58e9b019b3b83de0e",
+      "sample_rate": 44100,
+      "channels": 2,
+      "frames": 4321519,
+      "duration_seconds": 97.99362811791383,
+      "format": "WAV",
+      "subtype": "PCM_24",
+      "group_ids": [
+        56,
+        57
+      ],
+      "wav_names": [
+        "56.1.wav",
+        "57.1.wav"
+      ],
+      "node_ids": [
+        "56.1",
+        "57.1"
+      ]
+    },
+    {
+      "filename": "24_Ad Stack_WetStem.wav",
+      "path": "/Users/lucian/projects/spatialSeed/test_session/stems/24_Ad Stack_WetStem.wav",
+      "hash": "b6ede9026607ba7d389715bf86f037641acc31d96eae090dfbb3aaea02301292",
+      "sample_rate": 44100,
+      "channels": 2,
+      "frames": 4321519,
+      "duration_seconds": 97.99362811791383,
+      "format": "WAV",
+      "subtype": "PCM_24",
+      "group_ids": [
+        58,
+        59
+      ],
+      "wav_names": [
+        "58.1.wav",
+        "59.1.wav"
+      ],
+      "node_ids": [
+        "58.1",
+        "59.1"
+      ]
+    },
+    {
+      "filename": "25_Ad 1_WetStem.wav",
+      "path": "/Users/lucian/projects/spatialSeed/test_session/stems/25_Ad 1_WetStem.wav",
+      "hash": "9f36593c4f2a38e4422adfec88d0afeeb4a87d5e3fab7274a6ffd7b78a7316a7",
+      "sample_rate": 44100,
+      "channels": 2,
+      "frames": 4321519,
+      "duration_seconds": 97.99362811791383,
+      "format": "WAV",
+      "subtype": "PCM_24",
+      "group_ids": [
+        60,
+        61
+      ],
+      "wav_names": [
+        "60.1.wav",
+        "61.1.wav"
+      ],
+      "node_ids": [
+        "60.1",
+        "61.1"
+      ]
+    },
+    {
+      "filename": "26_Ad 2_WetStem.wav",
+      "path": "/Users/lucian/projects/spatialSeed/test_session/stems/26_Ad 2_WetStem.wav",
+      "hash": "96813ba8aadc6fd8059b57d5f53e209ae020184f84644671cafde0d011a40eec",
+      "sample_rate": 44100,
+      "channels": 2,
+      "frames": 4321519,
+      "duration_seconds": 97.99362811791383,
+      "format": "WAV",
+      "subtype": "PCM_24",
+      "group_ids": [
+        62,
+        63
+      ],
+      "wav_names": [
+        "62.1.wav",
+        "63.1.wav"
+      ],
+      "node_ids": [
+        "62.1",
+        "63.1"
+      ]
+    },
+    {
+      "filename": "27_Ad 1_WetStem.wav",
+      "path": "/Users/lucian/projects/spatialSeed/test_session/stems/27_Ad 1_WetStem.wav",
+      "hash": "dd3cde35813e0f340d61272afc3990db3ecb7a2b03fcac9b40fba1f1ee3a47e8",
+      "sample_rate": 44100,
+      "channels": 2,
+      "frames": 4321519,
+      "duration_seconds": 97.99362811791383,
+      "format": "WAV",
+      "subtype": "PCM_24",
+      "group_ids": [
+        64,
+        65
+      ],
+      "wav_names": [
+        "64.1.wav",
+        "65.1.wav"
+      ],
+      "node_ids": [
+        "64.1",
+        "65.1"
+      ]
+    },
+    {
+      "filename": "28_Nat 1_WetStem.wav",
+      "path": "/Users/lucian/projects/spatialSeed/test_session/stems/28_Nat 1_WetStem.wav",
+      "hash": "c4884e03e5125f575bd7183591770dd6f2613b1bb23d82aa905298f20bf8d0f6",
+      "sample_rate": 44100,
+      "channels": 2,
+      "frames": 4321519,
+      "duration_seconds": 97.99362811791383,
+      "format": "WAV",
+      "subtype": "PCM_24",
+      "group_ids": [
+        66,
+        67
+      ],
+      "wav_names": [
+        "66.1.wav",
+        "67.1.wav"
+      ],
+      "node_ids": [
+        "66.1",
+        "67.1"
+      ]
+    },
+    {
+      "filename": "29_Nat 2_WetStem.wav",
+      "path": "/Users/lucian/projects/spatialSeed/test_session/stems/29_Nat 2_WetStem.wav",
+      "hash": "e877dccf5fbd6ad57f5863ea6f4d84b55cf75ad9cf25cfd5c3ef31e81caf00b8",
+      "sample_rate": 44100,
+      "channels": 2,
+      "frames": 4321519,
+      "duration_seconds": 97.99362811791383,
+      "format": "WAV",
+      "subtype": "PCM_24",
+      "group_ids": [
+        68,
+        69
+      ],
+      "wav_names": [
+        "68.1.wav",
+        "69.1.wav"
+      ],
+      "node_ids": [
+        "68.1",
+        "69.1"
+      ]
+    },
+    {
+      "filename": "30_Nat 3_WetStem.wav",
+      "path": "/Users/lucian/projects/spatialSeed/test_session/stems/30_Nat 3_WetStem.wav",
+      "hash": "7e20d4d0e4e42ad57d20de8c84846d9274bc970b66f417fb665868313bd4f301",
+      "sample_rate": 44100,
+      "channels": 2,
+      "frames": 4321519,
+      "duration_seconds": 97.99362811791383,
+      "format": "WAV",
+      "subtype": "PCM_24",
+      "group_ids": [
+        70,
+        71
+      ],
+      "wav_names": [
+        "70.1.wav",
+        "71.1.wav"
+      ],
+      "node_ids": [
+        "70.1",
+        "71.1"
+      ]
+    },
+    {
+      "filename": "31_Nat 4_WetStem.wav",
+      "path": "/Users/lucian/projects/spatialSeed/test_session/stems/31_Nat 4_WetStem.wav",
+      "hash": "fa65e3b79dbda69b8fa8c8d4a7d6abe4c57b53054639b23d44658143e98fd40b",
+      "sample_rate": 44100,
+      "channels": 2,
+      "frames": 4321519,
+      "duration_seconds": 97.99362811791383,
+      "format": "WAV",
+      "subtype": "PCM_24",
+      "group_ids": [
+        72,
+        73
+      ],
+      "wav_names": [
+        "72.1.wav",
+        "73.1.wav"
+      ],
+      "node_ids": [
+        "72.1",
+        "73.1"
+      ]
+    },
+    {
+      "filename": "32_Nat High_WetStem.wav",
+      "path": "/Users/lucian/projects/spatialSeed/test_session/stems/32_Nat High_WetStem.wav",
+      "hash": "baea2127ca7982d5f1cd5f0fd4a5e89609ae9676fdf7178db48981cf765da697",
+      "sample_rate": 44100,
+      "channels": 2,
+      "frames": 4321519,
+      "duration_seconds": 97.99362811791383,
+      "format": "WAV",
+      "subtype": "PCM_24",
+      "group_ids": [
+        74,
+        75
+      ],
+      "wav_names": [
+        "74.1.wav",
+        "75.1.wav"
+      ],
+      "node_ids": [
+        "74.1",
+        "75.1"
+      ]
+    },
+    {
+      "filename": "33_Nat Hi 1_WetStem.wav",
+      "path": "/Users/lucian/projects/spatialSeed/test_session/stems/33_Nat Hi 1_WetStem.wav",
+      "hash": "466e9b50d156e930b1fec552c609424b9f0a0671d2ebdac6c8f3986c7e4f8ee1",
+      "sample_rate": 44100,
+      "channels": 2,
+      "frames": 4321519,
+      "duration_seconds": 97.99362811791383,
+      "format": "WAV",
+      "subtype": "PCM_24",
+      "group_ids": [
+        76,
+        77
+      ],
+      "wav_names": [
+        "76.1.wav",
+        "77.1.wav"
+      ],
+      "node_ids": [
+        "76.1",
+        "77.1"
+      ]
+    },
+    {
+      "filename": "34_Nat Hi 2_WetStem.wav",
+      "path": "/Users/lucian/projects/spatialSeed/test_session/stems/34_Nat Hi 2_WetStem.wav",
+      "hash": "4fc7ede74f3a9d1042dd786bda11d2c8b571b477680cb835ca7e4e778f4e0b91",
+      "sample_rate": 44100,
+      "channels": 2,
+      "frames": 4321519,
+      "duration_seconds": 97.99362811791383,
+      "format": "WAV",
+      "subtype": "PCM_24",
+      "group_ids": [
+        78,
+        79
+      ],
+      "wav_names": [
+        "78.1.wav",
+        "79.1.wav"
+      ],
+      "node_ids": [
+        "78.1",
+        "79.1"
+      ]
+    }
+  ]
+}

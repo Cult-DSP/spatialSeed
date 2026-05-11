@@ -22,7 +22,7 @@ from src.spatial.placement import PlacementEngine
 from src.spatial.gesture_engine import GestureEngine
 from src.export.lusid_writer import LUSIDSceneWriter
 from src.export.lusid_package import LUSIDPackageExporter
-from src.export.adm_bw64 import ADMBw64Exporter
+from src.export.cult_bridge import export_adm_bw64
 
 
 from src.core.logger import setup_logging
@@ -304,14 +304,6 @@ def main():
     # Save results
     results_path = Path(args.project_dir) / "export" / "results.json"
     with open(results_path, 'w') as f:
-        json.dump(results, f, indent=2)
-    
-    logger.info(f"\nResults saved to {results_path}")
-
-
-if __name__ == "__main__":
-    main()
-) as f:
         json.dump(results, f, indent=2)
     
     logger.info(f"\nResults saved to {results_path}")

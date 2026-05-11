@@ -90,6 +90,7 @@ def _run_pipeline(
     stems_dir: str,
     u: float,
     v: float,
+    export_adm: bool,
     overrides: Dict,
 ):
     """Run the full pipeline, capturing stdout as a log."""
@@ -100,7 +101,7 @@ def _run_pipeline(
     results = pipeline.run(
         u=u,
         v=v,
-        export_adm=False,
+        export_adm=export_adm,
         classification_overrides=overrides if overrides else None,
     )
     return results
@@ -111,7 +112,7 @@ def _run_pipeline(
 # ======================================================================
 
 def _render_sidebar():
-    """Render sidebar controls. Returns (project_dir, stems_dir, u, v)."""
+    """Render sidebar controls. Returns (project_dir, stems_dir, u, v, export_adm)."""
     with st.sidebar:
         # Project Settings Panel
         st.markdown('<div class="section-header">Project Settings</div>', unsafe_allow_html=True)
@@ -141,6 +142,12 @@ def _render_sidebar():
             label_visibility="collapsed"
         )
         st.caption("Stems Directory")
+
+        export_adm = st.checkbox(
+            "Export ADM BWF",
+            value=False,
+            help="Also export ADM/BW64 for DAW compatibility"
+        )
 
         st.markdown("---")
 
@@ -216,10 +223,10 @@ def _render_sidebar():
         st.markdown("---")
         st.caption("SpatialSeed v0.1.0")
 
-    return project_dir, stems_dir, u, v
+    return project_dir, stems_dir, u, v, export_adm
 
 
-def _render_generate_tab(project_dir: str, stems_dir: str, u: float, v: float):
+def _render_generate_tab(project_dir: str, stems_dir: str, u: float, v: float, export_adm: bool):
     """Render the Generate tab."""
     st.markdown('<div class="section-header">Generate Spatial Scene</div>', unsafe_allow_html=True)
 
@@ -269,6 +276,7 @@ def _render_generate_tab(project_dir: str, stems_dir: str, u: float, v: float):
                 "Gesture Generation",
                 "LUSID Scene Assembly",
                 "LUSID Package Export",
+                "ADM/BW64 Export",
             ]
             try:
                 # Capture stdout
@@ -277,7 +285,7 @@ def _render_generate_tab(project_dir: str, stems_dir: str, u: float, v: float):
                 sys.stdout = capture
 
                 results = _run_pipeline(
-                    project_dir, stems_dir, u, v, overrides
+                    project_dir, stems_dir, u, v, export_adm, overrides
                 )
 
                 sys.stdout = old_stdout
@@ -487,6 +495,16 @@ def _render_results_tab():
             wav_count = sum(1 for f in files if f.suffix == ".wav")
             json_count = sum(1 for f in files if f.suffix == ".json")
             st.write(f"  {json_count} JSON files, {wav_count} WAV files")
+    
+    # Check for ADM export in results or log
+    project_dir = results.get("project_dir", "") # pipeline.run doesn't return project_dir currently, but we can infer it
+    # Actually, pipeline.run returns lusid_package which is inside export/
+    if lusid_pkg:
+        adm_path = Path(lusid_pkg).parent / "export.adm.wav"
+        if adm_path.exists():
+            st.write(f"ADM/BW64: `{adm_path}`")
+            st.caption("Sidecar XML: " + str(adm_path.with_suffix(".xml")))
+
     st.markdown('</div>', unsafe_allow_html=True)
 
     # -- Scene details in a card -------------------------------------------------
@@ -876,48 +894,19 @@ def main():
         status_class = "ready" if status == "READY" else "generating"
         st.markdown(f'<div class="status-pill {status_class}">{status}</div>', unsafe_allow_html=True)
 
-    project_dir, stems_dir, u, v = _render_sidebar()
+    project_dir, stems_dir, u, v, export_adm = _render_sidebar()
 
     # Main tabs with updated styling
     tab_gen, tab_stems, tab_results = st.tabs(["Generate", "Stems", "Results"])
 
     with tab_gen:
-        _render_generate_tab(project_dir, stems_dir, u, v)
+        _render_generate_tab(project_dir, stems_dir, u, v, export_adm)
 
     with tab_stems:
         _render_stems_tab()
 
     with tab_results:
         _render_results_tab()
-
-
-if __name__ == "__main__":
-    main()
-("SpatialSeed")
-        st.caption("Immersive Spatial Scene Authoring — LUSID-first pipeline")
-    with col_status:
-        status = "READY" if not st.session_state.get("pipeline_running", False) else "GENERATING"
-        status_class = "ready" if status == "READY" else "generating"
-        st.markdown(f'<div class="status-pill {status_class}">{status}</div>', unsafe_allow_html=True)
-
-    project_dir, stems_dir, u, v = _render_sidebar()
-
-    # Main tabs with updated styling
-    tab_gen, tab_stems, tab_results = st.tabs(["Generate", "Stems", "Results"])
-
-    with tab_gen:
-        _render_generate_tab(project_dir, stems_dir, u, v)
-
-    with tab_stems:
-        _render_stems_tab()
-
-    with tab_results:
-        _render_results_tab()
-
-
-if __name__ == "__main__":
-    main()
-s_tab()
 
 
 if __name__ == "__main__":
