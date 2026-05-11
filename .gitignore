@@ -55,3 +55,7 @@ test_session/manifest.json
 temp/
 tmp/
 *.tmp
+
+# Packaging
+packaging/build/
+packaging/dist/

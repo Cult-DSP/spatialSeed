@@ -33,6 +33,7 @@ if str(_REPO_ROOT) not in sys.path:
 from src.pipeline import SpatialSeedPipeline
 from src.core.session import SessionManager
 from src.mir.classify import InstrumentClassifier
+from src.core.paths import get_user_data_dir
 
 
 # ======================================================================
@@ -62,6 +63,15 @@ COLOR_STATUS_EXPORTED = "#4a7a4a"
 
 def _init_state():
     """Initialise Streamlit session-state keys if absent."""
+    
+    # Default project directory
+    if hasattr(sys, '_MEIPASS'):
+        # In frozen mode, default to user data dir
+        default_base = str(get_user_data_dir() / "projects")
+    else:
+        # In development, keep repo-local default
+        default_base = str(_REPO_ROOT / "test_session")
+        
     defaults = {
         "manifest": None,
         "classifications": None,
@@ -70,10 +80,17 @@ def _init_state():
         "run_log": "",
         "status": "IDLE",
         "stems_discovered": False,
-        "base_dir": str(_REPO_ROOT / "test_session"),
+        "base_dir": default_base,
         "session_name": "my_session",
-        "stems_dir": str(_REPO_ROOT / "test_session" / "stems"),
+        "stems_dir": "", # Force user to pick or default to something safe
     }
+    
+    # If in dev and stems_dir is empty, try to point it at the test stems
+    if not hasattr(sys, '_MEIPASS') and not defaults["stems_dir"]:
+        test_stems = _REPO_ROOT / "test_session" / "stems"
+        if test_stems.exists():
+            defaults["stems_dir"] = str(test_stems)
+            
     for key, val in defaults.items():
         if key not in st.session_state:
             st.session_state[key] = val
